@@ -681,8 +681,8 @@ class Roadrunner:
         self.L.all_on(GREEN)"""
         
         ########################
-        #if parken_paral:
-        #    einparken_parallel()
+        if parken_paral:
+            einparken_paral()
         ########################
     
     def einparken_r(self):
@@ -822,9 +822,44 @@ class Roadrunner:
         self.L.all_on(GREEN)"""
         
         ########################
-        #if parken_paral:
-        #    einparken_parallel()
+        if parken_paral:
+            einparken_paral()
         ########################
+        
+    def einparken_paral(self):
+        self.state.eingeparkt = False
+        self.WL.write_Log("starte einparken_paral")
+        
+        
+        self.state.winkel, self.state.gesamt = self.G.WinkelMessen()
+        if self.state.gesamt <= 0:
+            self.state.gesamt = self.state.gesamt + 1620
+        self.state.geradeaus = 810 #geradeaus zur parklücke -90 nach L +90 nach R
+        
+        if self.state.gesamt > self.state.geradeaus:
+            self.state.current_direction = "l"
+            
+            
+            
+            
+            
+        elif self.state.gesamt <= self.state.geradeaus and self.state.LDL > 50:
+            self.state.current_direction = "r"
+            
+            _, self.LDV_P = self.LD.getMin_Dist_Bereich_RR(270, 90)
+            self.D.nach_links()
+            self.D.vor(0.1)
+            while self.LDV_P > 10 or self.state.gesamt <= self.state.geradeaus:
+                _, self.LDV_P = self.LD.getMin_Dist_Bereich_RR(270, 90)
+                time.sleep(0.1)
+            
+            
+        
+        
+        
+        
+        
+        
         
     def einparken(self):
         self.state.eingeparkt = False
