@@ -1,0 +1,12 @@
+[Unit]
+Description=roadrunner2 Autostart
+After=multi-user.target
+
+[Service]
+Type=idle
+User=pi
+Group=pi
+ExecStart=/home/pi/FE_2026/Autostart/autostart.sh
+
+[Install]
+WantedBy=multi-user.target

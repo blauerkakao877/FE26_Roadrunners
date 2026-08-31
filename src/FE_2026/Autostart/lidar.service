@@ -1,0 +1,12 @@
+[Unit]
+Description=Lidar Autostart
+After=multi-user.target
+
+[Service]
+Type=idle
+User=pi
+Group=pi
+ExecStart=/home/pi/FE_2026/Autostart/autostart_lidar.sh
+
+[Install]
+WantedBy=multi-user.target

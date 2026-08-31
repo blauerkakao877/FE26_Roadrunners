@@ -1,0 +1,8 @@
+Openrace Ablauf
+
+    Startsequenz
+Anfahren und nach Linien Suchen, Richtungf unbekannt und Liniencounter = 0
+Während des Fahrens mit hilfe des Gyros gerade lenken und mit dem Lidar Abstand von Wänden links&rechts halten, so wie wenn auto vorne warum auch immer zu nah an Wand ist
+Wenn Linie gefunfden, dann Liniencounter =+1, current direction setzen, linienspeerzeit setzten, nur noch nach der linienfarbe suchen
+Geradeaus Richtung =+- 90 grad, Speed eventuel höher, da Richtung klar ist
+Nach 3 Runden a Liniencounter = 12 kurz weiter und dann Endsequenz starten. 

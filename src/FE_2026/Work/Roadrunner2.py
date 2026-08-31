@@ -37,7 +37,8 @@ class Roadrunner:
     # -------------------- START --------------------
 
     def start_sequence(self):
-        self.parktest = True
+        self.parktest = False
+        self.parken_paral = True
         self.LDV = 50
         self.LDL = 0
         self.LDR = 0
@@ -108,6 +109,9 @@ class Roadrunner:
             
             self.L.all_W()
             print("Openrace")
+            
+        if self.parktest:
+            self.state.mode = "obstacle"
 
         self.WL.write_Log("Mode: "+str(self.state.mode))
         self.D.gerade()
@@ -614,6 +618,9 @@ class Roadrunner:
         self.WL.write_Log("Geradeaus vor dem fahren zum Parkplatz: "+str(self.state.geradeaus))
         self.state.current_direction = "r"
         
+        _, self.b_hsv_main, _, _, _ = self.C.get_image_back()
+        self.state.back_cam = True
+        self.state.front_cam = False
         self.L.all_on(WHITE)
         self.D.vor(0.15)
         
@@ -681,8 +688,8 @@ class Roadrunner:
         self.L.all_on(GREEN)"""
         
         ########################
-        if parken_paral:
-            einparken_paral()
+        if self.parken_paral:
+            self.einparken_paral()
         ########################
     
     def einparken_r(self):
@@ -730,7 +737,7 @@ class Roadrunner:
             _, self.state.LDV = self.LD.getMin_Dist_Bereich_RR(353, 7)
         self.D.stop()
         time.sleep(0.1)
-        self.D.ruck(0.2)
+        self.D.ruck(0.15)
         self.D.nach_rechts()
         
         #self.state.geradeaus = 900
@@ -749,6 +756,8 @@ class Roadrunner:
         
         self.hellRMag = 0
         _, self.b_hsv_main, _, _, _ = self.C.get_image_back()
+        self.state.back_cam = True
+        self.state.front_cam = False
         _, _, self.hellLMag, _ = self.C.waende_Magenta(self.b_hsv_main)
         self.L.all_on(WHITE)
         self.D.vor(0.15)
@@ -822,22 +831,26 @@ class Roadrunner:
         self.L.all_on(GREEN)"""
         
         ########################
-        if parken_paral:
-            einparken_paral()
+        if self.parken_paral:
+            self.einparken_paral()
         ########################
         
     def einparken_paral(self):
         self.state.eingeparkt = False
         self.WL.write_Log("starte einparken_paral")
         
-        
         self.state.winkel, self.state.gesamt = self.G.WinkelMessen()
-        if self.state.gesamt <= 0:
-            self.state.gesamt = self.state.gesamt + 1620
-        self.state.geradeaus = 810 #geradeaus zur parklücke -90 nach L +90 nach R
+        _, self.LDL = self.LD.getMin_Dist_Bereich_RR(260, 280)
+        _, self.LDR = self.LD.getMin_Dist_Bereich_RR(80, 100)
         
-        if self.state.gesamt > self.state.geradeaus:
+        
+        #if self.state.gesamt <= 0:
+            #self.state.gesamt = self.state.gesamt + 1620
+        #self.state.geradeaus = 810 #geradeaus zur parklücke -90 nach L +90 nach R
+        
+        if self.state.gesamt > self.state.geradeaus and self.state.LDR > 50:
             self.state.current_direction = "l"
+            self.WL.write_Log("Baustelle")
             
             
             
@@ -845,21 +858,44 @@ class Roadrunner:
             
         elif self.state.gesamt <= self.state.geradeaus and self.state.LDL > 50:
             self.state.current_direction = "r"
+            self.state.geradeaus = 900
             
+            self.WL.write_Log("Zug 1")
             _, self.LDV_P = self.LD.getMin_Dist_Bereich_RR(270, 90)
             self.D.nach_links()
             self.D.vor(0.1)
-            while self.LDV_P > 10 or self.state.gesamt <= self.state.geradeaus:
+            while self.LDV_P > 10 and self.state.gesamt <= self.state.geradeaus:
                 _, self.LDV_P = self.LD.getMin_Dist_Bereich_RR(270, 90)
+                self.WL.write_Log("Minimale Disatanz Vorne: "+str(self.LDV_P))
+                self.state.winkel, self.state.gesamt = self.G.WinkelMessen()
+                self.WL.write_Log("Winkel: "+str(self.state.gesamt))
                 time.sleep(0.1)
-            
-            
-        
-        
-        
-        
-        
-        
+                
+            if not self.state.gesamt <= self.state.geradeaus:
+                self.WL.write_Log("Zug 2")
+                _, self.LDH_P = self.LD.getMin_Dist_Bereich_RR(90, 270)
+                self.D.nach_rechts()
+                self.D.ruck(0.1)
+                while self.LDH_P > 10 and self.state.gesamt <= self.state.geradeaus:
+                    _, self.LDH_P = self.LD.getMin_Dist_Bereich_RR(90, 270)
+                    self.WL.write_Log("Minimale Disatanz Vorne: "+str(self.LDH_P))
+                    self.state.winkel, self.state.gesamt = self.G.WinkelMessen()
+                    self.WL.write_Log("Winkel: "+str(self.state.gesamt))
+                    time.sleep(0.1)
+                
+            if not self.state.gesamt <= self.state.geradeaus:
+                self.WL.write_Log("Zug 3")
+                _, self.LDV_P = self.LD.getMin_Dist_Bereich_RR(270, 90)
+                self.D.nach_links()
+                self.D.vor(0.1)
+                while self.LDV_P > 10 and self.state.gesamt <= self.state.geradeaus:
+                    _, self.LDV_P = self.LD.getMin_Dist_Bereich_RR(270, 90)
+                    self.WL.write_Log("Minimale Disatanz Vorne: "+str(self.LDV_P))
+                    self.state.winkel, self.state.gesamt = self.G.WinkelMessen()
+                    self.WL.write_Log("Winkel: "+str(self.state.gesamt))
+                    time.sleep(0.1)
+            self.state.eingeparkt = True
+
         
     def einparken(self):
         self.state.eingeparkt = False
@@ -903,6 +939,8 @@ class Roadrunner:
         self.state.linie_zaehlen = 0
         self.state.stop_time = 0.0
         self.draw_line_until = 0
+        self.state.front_cam = True
+        self.state.back_cam = False
 
         presets = {
             "slow": {
@@ -947,7 +985,7 @@ class Roadrunner:
         self.D.vor(0.5) #self.speed / 0.3
 
         while self.state.Rennen_laeuft and not self.D.button_pressed():
-
+            
             try:
                 hsv_full, hsv_main, bgr_main, hsv_line, bgr_line = self.C.get_image()
             except Exception as e:
@@ -1026,12 +1064,14 @@ class Roadrunner:
         self.state.orange_linie = False
         self.state.linie_imbild = False
         self.stop_time_set = False
+        self.state.front_cam = True
+        self.state.back_cam = False
 
         self.pink_last = 0
         
         presets = {
             "slow": {
-                "run_speed": 0.3,
+                "run_speed": 0.23,
                 
                 "linie_warten": 2.3,
                 "linie_warten_LG": 2.3,
@@ -1128,8 +1168,47 @@ class Roadrunner:
         self.WL.write_Log("mode medium: "+str(self.state.medium))
         self.WL.write_Log("mode fast: "+str(self.state.fast))
         
+        
+        # ================= PARKTEST =================
+        if self.parktest:
+            
+            self.state.current_direction == "r"
+            
+            # Start direkt vor der letzten Kurve
+            # Die nächste Linie ist Linie 12
+            self.state.linien_counter = 11
 
-        self.ausparken()
+            if self.state.current_direction == "l":
+                # Links: -90° pro Abschnitt
+                self.state.geradeaus = -990
+                self.state.gesamt = -990
+
+            elif self.state.current_direction == "r":
+                # Rechts: +90° pro Abschnitt
+                self.state.geradeaus = 990
+                self.state.gesamt = 990
+
+            self.state.stop_time = time.time + 3.0
+            self.stop_time_set = False
+
+            # Keine alte erkannte Linie übernehmen
+            self.state.blaue_linie = False
+            self.state.orange_linie = False
+            self.state.linie_imbild = False
+
+            self.WL.write_Log("===== PARKTEST =====")
+            self.WL.write_Log("linien_counter: " + str(self.state.linien_counter))
+            self.WL.write_Log("geradeaus: " + str(self.state.geradeaus))
+            self.WL.write_Log("gesamt: " + str(self.state.gesamt))
+            self.WL.write_Log("richtung: " + str(self.state.current_direction))
+            self.WL.write_Log("====================")
+
+        else:
+            # normaler Start
+            self.state.linien_counter = 0
+            self.state.geradeaus = 0
+            self.ausparken()
+        
         self.D.vor(self.speed)
 
         while not self.D.button_pressed() and self.state.Rennen_laeuft:
@@ -1143,8 +1222,11 @@ class Roadrunner:
                 break
             
             # ---------------- VIDEO ----------------
-            record_img = self.bgr_main.copy()
-
+            if self.state.front_cam:
+                record_img = self.bgr_main.copy()
+            if self.state.back_cam:
+                record_img = self.b_hsv_main.copy()
+        
             # ---- Linien anzeigen ----
             if self.state.current_direction == "l":
                 if self.state.blaue_linie:
