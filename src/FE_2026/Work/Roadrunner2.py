@@ -854,46 +854,52 @@ class Roadrunner:
             
             
             
-            
-            
         elif self.state.gesamt <= self.state.geradeaus and self.state.LDL > 50:
             self.state.current_direction = "r"
-            self.state.geradeaus = 900
+            self.state.geradeaus = 720
             
-            self.WL.write_Log("Zug 1")
             _, self.LDV_P = self.LD.getMin_Dist_Bereich_RR(270, 90)
             self.D.nach_links()
             self.D.vor(0.1)
-            while self.LDV_P > 10 and self.state.gesamt <= self.state.geradeaus:
+            while self.LDV_P > 15 and self.state.gesamt <= self.state.geradeaus:
                 _, self.LDV_P = self.LD.getMin_Dist_Bereich_RR(270, 90)
-                self.WL.write_Log("Minimale Disatanz Vorne: "+str(self.LDV_P))
+                self.WL.write_Log("Minimale Distanz Vorne: "+str(self.LDV_P))
                 self.state.winkel, self.state.gesamt = self.G.WinkelMessen()
                 self.WL.write_Log("Winkel: "+str(self.state.gesamt))
                 time.sleep(0.1)
-                
-            if not self.state.gesamt <= self.state.geradeaus:
-                self.WL.write_Log("Zug 2")
+
+            if self.state.gesamt <= self.state.geradeaus:
+                # Winkel NICHT erreicht -> Abbruch war wegen Lidar -> weiter mit Zug 2
+                self.WL.write_Log("Zug 1 durch Lidar abgebrochen, Winkel noch nicht erreicht -> Zug 2")
+
                 _, self.LDH_P = self.LD.getMin_Dist_Bereich_RR(90, 270)
                 self.D.nach_rechts()
                 self.D.ruck(0.1)
-                while self.LDH_P > 10 and self.state.gesamt <= self.state.geradeaus:
+                while self.LDH_P > 15 and self.state.gesamt <= self.state.geradeaus:
                     _, self.LDH_P = self.LD.getMin_Dist_Bereich_RR(90, 270)
-                    self.WL.write_Log("Minimale Disatanz Vorne: "+str(self.LDH_P))
+                    self.WL.write_Log("Minimale Distanz Hinten: "+str(self.LDH_P))
                     self.state.winkel, self.state.gesamt = self.G.WinkelMessen()
                     self.WL.write_Log("Winkel: "+str(self.state.gesamt))
                     time.sleep(0.1)
-                
-            if not self.state.gesamt <= self.state.geradeaus:
-                self.WL.write_Log("Zug 3")
-                _, self.LDV_P = self.LD.getMin_Dist_Bereich_RR(270, 90)
-                self.D.nach_links()
-                self.D.vor(0.1)
-                while self.LDV_P > 10 and self.state.gesamt <= self.state.geradeaus:
+
+                if self.state.gesamt <= self.state.geradeaus:
+                    # auch hier: Winkel noch nicht erreicht -> Zug 3
+                    self.WL.write_Log("Zug 2 durch Lidar abgebrochen, Winkel noch nicht erreicht -> Zug 3")
+
                     _, self.LDV_P = self.LD.getMin_Dist_Bereich_RR(270, 90)
-                    self.WL.write_Log("Minimale Disatanz Vorne: "+str(self.LDV_P))
-                    self.state.winkel, self.state.gesamt = self.G.WinkelMessen()
-                    self.WL.write_Log("Winkel: "+str(self.state.gesamt))
-                    time.sleep(0.1)
+                    self.D.nach_links()
+                    self.D.vor(0.1)
+                    while self.LDV_P > 15 and self.state.gesamt <= self.state.geradeaus:
+                        _, self.LDV_P = self.LD.getMin_Dist_Bereich_RR(270, 90)
+                        self.WL.write_Log("Minimale Distanz Vorne: "+str(self.LDV_P))
+                        self.state.winkel, self.state.gesamt = self.G.WinkelMessen()
+                        self.WL.write_Log("Winkel: "+str(self.state.gesamt))
+                        time.sleep(0.1)
+                else:
+                    self.WL.write_Log("Zug 2: Winkel bereits erreicht, überspringe Zug 3")
+            else:
+                self.WL.write_Log("Zug 1: Winkel bereits erreicht, überspringe Zug 2 und 3")
+
             self.state.eingeparkt = True
 
         
