@@ -1,6 +1,6 @@
 Roadrunners – Future Engineers 2026
 ====
-<div align="left">
+<div align="center">
   <img src="./other/Roadrunners_log_groß_trans.jpeg" width="60%" alt="Roadrunners Logo">
 </div>
 
@@ -65,7 +65,7 @@ This repository contains all the code, documentation, and resources for our proj
 
 
 ## Car Photos
-Here is an overview of our final car design. High-resolution photos can be found [**here**](./v-photos/README.md). 
+Here is an overview of our final car design. High-resolution photos can be found [**in v-photos**](./v-photos/README.md). 
 <table> <tr> <td align="center">
     <img src="./v-photos/front_labels.png" width="90%"><br>Front View</td> <td align="center">
         <img src="./v-photos/back_labels.png" width="90%"><br>Back View</td> </tr> <tr> <td align="center">
@@ -85,7 +85,7 @@ Here is an overview of our final car design. High-resolution photos can be found
 
 ## Chassis
 
-Detailed building instructions for the chassis are found [**here**](./Building_Instructions/README.md).
+Detailed building instructions for the chassis can be found [**in Building_Instructions**](./Building_Instructions/README.md).
 
 ### Driving Base
 
