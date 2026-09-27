@@ -115,6 +115,21 @@ Detailed building instructions for the chassis can be found [**in Building_Instr
 
 ### Wiring Diagram
 
+Unfortunately, there was no Fritzing element for our Seengreat Motor and Servo Driver HAT. 
+So we looked up the elements and their internal wiring in the manufacturer's docs and included these elements separately in our wiring diagram.
+We then drew a blue rectangle to indicate which elements are indeed part of the Seengreat HAT.
+These are a 5V-Step-Down, a TB1266FNG Motor driver, a PCA9685 PWM Driver and an on/off switch.
+
+<div align="center">
+  <img src="./schemes/Wiring_Diagram_2026.png">
+</div>
+
+Even though the connections to the Raspberry Pi can be seen in the wiring diagram, we also added this graphic to show which cable color for which purpose goes to the Raspberry Pi headers.
+If a cable comes loose, this graphic helps to put it back in place easily.
+
+<div align="center">
+  <img src="./schemes/Raspi_pinout_connections.png">
+</div>
 
 
 # Software Architecture & Obstacle Strategy 
