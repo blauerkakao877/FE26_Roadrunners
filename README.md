@@ -148,6 +148,13 @@ The alternative would have been to build the chassis in 3D-printing. However, ra
 
 ### Controllers
 
+- previous car: separate motor controller ans servo controller.
+- this year: goal: use combined controller to save space and buils flat enough for LiDAR
+- test 3 types: adeept robot hat 3.0, waveshare robot driver hat and seengrat motor and servo hat.
+- problem: only 1 pca9685 pwm driver for both motor pwm and servo pwm.
+  servo: needs 50 Hz pwm frequency, motors: typically uses a lot higher frequency -> not possible with only 1 pwm driver
+  original lego PFL Motor rattles loudly at low speed and 50 Hz, CaDa rattles much less due to better gearing quality
+  disadvantage 1 pwm driver acceptable for CaDa motor, so combined but smaller controller is better
 
 # Power & Sense Management 
 
@@ -170,6 +177,7 @@ The alternative would have been to build the chassis in 3D-printing. However, ra
 
 ### Wiring Diagram
 
+We created the wiring diagram using the Fritzing software package.
 Unfortunately, there was no Fritzing element for our Seengreat Motor and Servo Driver HAT. 
 So we looked up the elements and their internal wiring in the manufacturer's docs and included these elements separately in our wiring diagram.
 We then drew a blue rectangle to indicate which elements are indeed part of the Seengreat HAT.
@@ -207,6 +215,14 @@ If a cable comes loose, this graphic helps to put it back in place easily.
 - chassis height (wheel size) and speed
 - speed and rear axle gearing
 - motor choice: speed, gearing and pwm frequency stability
+- previous car: separate motor controller ans servo controller.
+- this year: goal: use combined controller to save space and buils flat enough for LiDAR
+- test 3 types: adeept robot hat 3.0, waveshare robot driver hat and seengrat motor and servo hat.
+- problem: only 1 pca9685 pwm driver for both motor pwm and servo pwm.
+  servo: needs 50 Hz pwm frequency, motors: typically uses a lot higher frequency -> not possible with only 1 pwm driver
+  original lego PFL Motor rattles loudly at low speed and 50 Hz, CaDa rattles much less due to better gearing quality
+  disadvantage 1 pwm driver acceptable for CaDa motor, so combined but smaller controller is better
+
 - LiDAR and Camera position
 - LiDAR, python GIL and software design
 
