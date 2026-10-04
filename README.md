@@ -7,6 +7,8 @@ Roadrunners – Future Engineers 2026
 ## Table of Contents
 
 - [Introduction](#introduction)
+    - [The Team](#the-team)
+	- [Season 2026 Engineering Goals](#season-2026-engineering-goals)
 - [Overview](#overview)
 	- [Roadrunner Fact Sheet](#roadrunner-fact-sheet)
 	- [Car Photos](#car-photos)
@@ -41,9 +43,52 @@ Roadrunners – Future Engineers 2026
 
 # Introduction
 
-Welcome to the GitHub hub of **Team Roadrunners**, proudly representing **Germany⚫🔴🟡** at the **WRO Worldfinal 2026**!
-
+Welcome to the GitHub hub of **Team Roadrunners**, proudly representing **Germany⚫🔴🟡** at the **WRO World Final 2026**!
 This repository contains all the code, documentation, and resources for our project. We have used scoring criteria from the rulebook as headings in our documentation to make it easy to navigate through our repository.
+
+## The Team
+
+Paul Krohn
+
+
+Ben Lüttecke
+
+
+
+## Season 2026 Engineering Goals
+
+We have analyzed the strengths and weaknesses of our 2025 Future Engineers car. From that, we defined the goals for this season's car.
+
+
+Strengths in 2025 car:
+- camera model, position and FoV require only few processing to exclude non-game field areas
+- footprint size small enough to pass between obstacle and near wall with enough headroom
+- min-max speed range
+- IMU/Gyro stability
+- LEDs for Debugging and Testing
+
+
+Weaknesses in 2025 car:
+- weight: too heavy for single motor
+- turning radius too large
+- parallel parking too often touches a pink wall
+- dead angles in obstacle and wall detection too large
+
+
+To improve at the weaknesses, a lot of technical decisions were necessary. As we discovered, many of them were not independent from each other and had impacts on strengths we wanted to keep.
+So at various points, design trade-offs were necessary between conflicting goals. 
+We describe those and the reasons for the final decisions in detail in the section [**Overall System & Engineering Decisions**](#overall-system--engineering-decisions).
+
+Apart from specific goals for this season, we have defined some general engineering rules for ourselves.
+
+- precision before speed
+A better precision makes it more likely to run without driving errors. So it ranks higher than running at higher speed.
+
+- test new ideas early 
+Test early wether a new idea is helpful with prototypes. Find drawbacks as early as possible.
+
+- Always have a backup
+
 
 # Overview
 
@@ -53,14 +98,20 @@ This repository contains all the code, documentation, and resources for our proj
 
 ## Roadrunner Fact Sheet
 
-| Measurement | Value      |
-| ----------- | ---------- |
-| Height      | 9,5 cm     |
-| Width       | 13,5 cm    |
-| Length      | 18,8 cm    |
-| Weight      | 572 g      |
-| min. Speed  | 0.13 m/sec |
-| max. Speed  | 1.58 m/sec |
+| Property                  | Value                                                        |
+| ------------------------- | ------------------------------------------------------------ |
+| Height                    | 9,5 cm                                                       |
+| Width                     | 13,5 cm                                                      |
+| Length                    | 18,8 cm                                                      |
+| Weight                    | 572 g                                                        |
+| Speed Range               | min: 0.13 m/sec  max: 1.58 m/sec                             |
+| Overall power consumption | 16.2 W                                                       |
+| Chassis build system      | Lego Technic  (mostly)                                       |
+| Motorization              | lego-compatible motor driving rear axle, 1:1 gearbox connection, no encoder |
+| Steering system           | Ackermann front  steering with differential rear axle        |
+| Sensing system            | 2 RPI cams, 360 degree LiDAR, IMU (Gyro+Acceleration)        |
+| Controller                | Raspberry Pi5 8 GB + Motor and Servo HAT                     |
+| Programming               | Python                                                       |
 
 
 
@@ -85,7 +136,11 @@ Here is an overview of our final car design. High-resolution photos can be found
 
 ## Chassis
 
-Detailed building instructions for the chassis can be found [**in Building_Instructions**](./Building_Instructions/README.md).
+Detailed building instructions for the chassis and the bill of materials can be found [**in Building_Instructions**](./Building_Instructions/README.md).
+
+Our previous roadrunner car has been build from lego technic parts and we decided to keep it that way. Lego Technic is a rather sturdy material and we have lots of technic parts from other lego robotic projects in the past. 
+
+The alternative would have been to build the chassis in 3D-printing. However, rapid prototyping, testing new ideas, new placements, other gearings etc is faster with already pre-produced parts and later changes, e.g. for surprise rules,  are easier to be applied to a lego chassis.
 
 ### Driving Base
 
@@ -147,6 +202,13 @@ If a cable comes loose, this graphic helps to put it back in place easily.
 
 ## Design Trade-Offs
 
+- LiDAR vs ToF Sensors
+- LiDAR and Chassis height
+- chassis height (wheel size) and speed
+- speed and rear axle gearing
+- motor choice: speed, gearing and pwm frequency stability
+- LiDAR and Camera position
+- LiDAR, python GIL and software design
 
 
 # Appendices
@@ -154,6 +216,13 @@ If a cable comes loose, this graphic helps to put it back in place easily.
 ## Hardware Bill of Materials
 
 ## Software Modules
+
+- Rasbian Bookworm Operating System
+- OpenCV image processing
+- Adafruit Blinka (Interface to circuitpython/micropython libs for electronic hardware modules)
+- Adafruit_CircuitPython_BNO08x
+- Adafruit-PCA9685
+- GitHub: nannigalaxy/ldrobot_lidar
 
 ## Resources
 
