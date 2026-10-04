@@ -89,7 +89,7 @@ Electronics placements:
 - 1 x Adafruit 9-DOF IMU BNO085 (Gyro and accel sensor)
 - 1 x DFRobot STL-19P Lidar Set
 - 1 x Pololu U3V70A Step-Up Module adjustable
-- 1 x CaDa L-Motor Pro CJV5074(Lego power functions compatible)
+- 1 x CaDa L-Motor Pro CJV5028 (Lego power functions compatible)
 - 1 x Geekservo Elecfreaks 360 grey Lego-compatible servo motor
 - 1 x 7.4V 1100mAh Red Power Lipo battery
 - 1 x XT60 socket with power cable

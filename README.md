@@ -15,10 +15,8 @@ Roadrunners – Future Engineers 2026
 - [Mobility & Mechanical Design](#mobility--mechanical-design)
     - [Motorization](#motorization)
     - [Steering Mechanism](#Steering-Mechanism)
-	- [Chassis](#Chassis)
-		- [Driving Base](#driving-base)
-		- [Wheels](#wheels)
-		- [Controllers](#controllers)
+	- [Driving Base](#driving-base)
+	- [Controllers](#controllers)
 - [Power & Sense Management](#Power--Sense-Management)  
     - [Sensors](#Sensors)
 		- [LiDAR](#lidar)
@@ -74,10 +72,12 @@ Weaknesses in 2025 car:
 - parallel parking too often touches a pink wall
 - dead angles in obstacle and wall detection too large
 
-
 To improve at the weaknesses, a lot of technical decisions were necessary. As we discovered, many of them were not independent from each other and had impacts on strengths we wanted to keep.
 So at various points, design trade-offs were necessary between conflicting goals. 
-We describe those and the reasons for the final decisions in detail in the section [**Overall System & Engineering Decisions**](#overall-system--engineering-decisions).
+
+A major point in improvements was to use a LiDAR for sensing distances and mount it in a way that it has a free 360 degree field of view. We felt this would be helpful in solving various previous weaknesses during driving and parking. However, this goal had major implications on how to build the chassis and which electronics can be used. A detailed discussions is provided in the sections about chassis and LiDAR sensor.
+
+We sum up all the design trade-offs and the reasons for the final decisions in detail in the section [**Overall System & Engineering Decisions**](#overall-system--engineering-decisions).
 
 Apart from specific goals for this season, we have defined some general engineering rules for ourselves.
 
@@ -130,23 +130,26 @@ Here is an overview of our final car design. High-resolution photos can be found
 
 # Mobility & Mechanical Design 
 
-## Motorization
-
-## Steering Mechanism
-
-## Chassis
-
-Detailed building instructions for the chassis and the bill of materials can be found [**in Building_Instructions**](./Building_Instructions/README.md).
 
 Our previous roadrunner car has been build from lego technic parts and we decided to keep it that way. Lego Technic is a rather sturdy material and we have lots of technic parts from other lego robotic projects in the past. 
 
 The alternative would have been to build the chassis in 3D-printing. However, rapid prototyping, testing new ideas, new placements, other gearings etc is faster with already pre-produced parts and later changes, e.g. for surprise rules,  are easier to be applied to a lego chassis.
 
-### Driving Base
+To be able to use a LiDAR with 360 degree FoV  (goal for this season, see above), 
 
-### Wheels
+- the LiDAR must be mounted so its sensor's plane of rotation is significantly below 10 cm wall and obstacles height
 
-### Controllers
+- all other chassis and electronics elements must be placed below the LiDAR sensor's plane of rotation.
+
+Detailed building instructions for the resulting chassis and the bill of materials can be found in [**Building_Instructions**](./Building_Instructions/README.md).
+
+## Motorization
+
+## Steering Mechanism
+
+## Driving Base
+
+## Controllers
 
 - previous car: separate motor controller ans servo controller.
 - this year: goal: use combined controller to save space and buils flat enough for LiDAR
@@ -155,6 +158,8 @@ The alternative would have been to build the chassis in 3D-printing. However, ra
   servo: needs 50 Hz pwm frequency, motors: typically uses a lot higher frequency -> not possible with only 1 pwm driver
   original lego PFL Motor rattles loudly at low speed and 50 Hz, CaDa rattles much less due to better gearing quality
   disadvantage 1 pwm driver acceptable for CaDa motor, so combined but smaller controller is better
+  
+
 
 # Power & Sense Management 
 
