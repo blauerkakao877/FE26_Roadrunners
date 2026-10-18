@@ -13,9 +13,9 @@ Roadrunners – Future Engineers 2026
 	- [Roadrunner Fact Sheet](#roadrunner-fact-sheet)
 	- [Car Photos](#car-photos)
 - [Mobility & Mechanical Design](#mobility--mechanical-design)
-    - [Motorization](#motorization)
+	- [Driving Base](#driving-base)	
     - [Steering Mechanism](#Steering-Mechanism)
-	- [Driving Base](#driving-base)
+    - [Motorization](#motorization)
 	- [Controllers](#controllers)
 - [Power & Sense Management](#Power--Sense-Management)  
     - [Sensors](#Sensors)
@@ -79,15 +79,29 @@ A major point in improvements was to use a LiDAR for sensing distances and mount
 
 We sum up all the design trade-offs and the reasons for the final decisions in detail in the section [**Overall System & Engineering Decisions**](#overall-system--engineering-decisions).
 
+We thought a LiDAR sensor would solve a lot of our dead angle problems. However, to be useful when manouevering within the parking box and while driving on the parcours as well, it would ideally have a full 360 degree unblocked field of view. 
+
+- Goal 1: Redesign chassis to support a true 360 degree FoV LiDAR
+
+- Goal 2: Achive better agility (smaller turning circle)
+
+- Goal 3: Redesign Software to make use of 360 degree LiDAR
+
+- Goal 4: Increase maximum speed
+
+  
+
 Apart from specific goals for this season, we have defined some general engineering rules for ourselves.
 
-- precision before speed
+- Precision before speed
 A better precision makes it more likely to run without driving errors. So it ranks higher than running at higher speed.
 
-- test new ideas early 
+- Test new ideas early 
 Test early wether a new idea is helpful with prototypes. Find drawbacks as early as possible.
 
 - Always have a backup
+
+  
 
 
 # Overview
@@ -109,6 +123,7 @@ Test early wether a new idea is helpful with prototypes. Find drawbacks as early
 | Chassis build system      | Lego Technic  (mostly)                                       |
 | Motorization              | lego-compatible motor driving rear axle, 1:1 gearbox connection, no encoder |
 | Steering system           | Ackermann front  steering with differential rear axle        |
+| Power Supply              | 2S 7.4V 1100 mAh Lipo Battery                                |
 | Sensing system            | 2 RPI cams, 360 degree LiDAR, IMU (Gyro+Acceleration)        |
 | Controller                | Raspberry Pi5 8 GB + Motor and Servo HAT                     |
 | Programming               | Python                                                       |
@@ -116,7 +131,7 @@ Test early wether a new idea is helpful with prototypes. Find drawbacks as early
 
 
 ## Car Photos
-Here is an overview of our final car design. High-resolution photos can be found [**in v-photos**](./v-photos/README.md). 
+Here is an overview of our final car design. High-resolution photos can be found in [**v-photos**](./v-photos/README.md). 
 <table> <tr> <td align="center">
     <img src="./v-photos/front_labels.png" width="90%"><br>Front View</td> <td align="center">
         <img src="./v-photos/back_labels.png" width="90%"><br>Back View</td> </tr> <tr> <td align="center">
@@ -131,23 +146,70 @@ Here is an overview of our final car design. High-resolution photos can be found
 # Mobility & Mechanical Design 
 
 
+The chassis of the Roadrunner is constructed in two layers: 
+- the driving base consists of a back axle block with motor and gearing and the front axle block containing the steering mechanism and servo
+- the electronics layer contains controllers and sensors
+
 Our previous roadrunner car has been build from lego technic parts and we decided to keep it that way. Lego Technic is a rather sturdy material and we have lots of technic parts from other lego robotic projects in the past. 
 
 The alternative would have been to build the chassis in 3D-printing. However, rapid prototyping, testing new ideas, new placements, other gearings etc is faster with already pre-produced parts and later changes, e.g. for surprise rules,  are easier to be applied to a lego chassis.
 
-To be able to use a LiDAR with 360 degree FoV  (goal for this season, see above), 
+To be able to use a LiDAR with 360 degree FoV  (goal 1 for this season, see above), 
 
 - the LiDAR must be mounted so its sensor's plane of rotation is significantly below 10 cm wall and obstacles height
 
 - all other chassis and electronics elements must be placed below the LiDAR sensor's plane of rotation.
 
+## Driving Base
+
+The first step in flattening the driving base was to use smaller wheels. In our previous car, we used 56x14 mm Lego Spike Prime wheels, which performed well.
+This year, we used the smaller variant, the 43x14 mm Spike Prime wheels. With those, there is still enough ground clearance for a Lego motor.
+
+<img src="./v-photos/wheels.png" width="30%">
+
+- Advantage: new wheels have same width and grip as before but save height in axle position and overall height.
+- Disadvantage: smaller wheels decrease th maximum speed and therefore contradict goal 4. 
+
+According to rule precision before speed, this is acceptable.
+
+
+### Steering Mechanism
+
+To achieve goal 3, more agility, we tested some steering system variants.
+
+**Steering Servo Options**
+
+|             | Geekservo Grey 360 | MG90S Micro Servo |
+| ----------- | ------------------ | ----------------- |
+|             |<img src="./v-photos/servo.jpg">|<img src="./v-photos/mg90s.jpg" style="zoom:25%;" >|
+| Voltage     |       4.8 - 6V     |   4.8 - 6V        |
+| Torque      |    2 kg/cm at 5V   |   2 kg/cm at 5V   |
+| Weight      |        20g         |       13.4g       |
+| Form Factor |     24x24x40mm     |     23x12x29mm    |
+
+The MG90S is is little bit lighter as the Geekservo. 
+The Geekservo has a housing with lego connections, so it can be used as a structural element and combines with Lego very easily.
+The MG90s requires additional strutural elements to build it in, which reduces the weight advantage.
+We already used the Geekservo last year and it worked well, so decision is to keep it.
+
+
+
+
+
+
+### Motorization
+
+
+The resulting driving base looks like this:
+
+
+### Mounts for electronics
+
+Center of gravity:
+
+
 Detailed building instructions for the resulting chassis and the bill of materials can be found in [**Building_Instructions**](./Building_Instructions/README.md).
 
-## Motorization
-
-## Steering Mechanism
-
-## Driving Base
 
 ## Controllers
 
