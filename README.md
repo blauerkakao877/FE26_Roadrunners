@@ -147,7 +147,7 @@ Here is an overview of our final car design. High-resolution photos can be found
 
 
 The chassis of the Roadrunner is constructed in two layers: 
-- the driving base consists of a back axle block with motor and gearing and the front axle block containing the steering mechanism and servo
+- the driving base consists of a rear axle block with motor and gearing and the front axle block containing the steering mechanism and servo
 - the electronics layer contains controllers and sensors
 
 Our previous roadrunner car has been build from lego technic parts and we decided to keep it that way. Lego Technic is a rather sturdy material and we have lots of technic parts from other lego robotic projects in the past. 
@@ -159,6 +159,8 @@ To be able to use a LiDAR with 360 degree FoV  (goal 1 for this season, see abov
 - the LiDAR must be mounted so its sensor's plane of rotation is significantly below 10 cm wall and obstacles height
 
 - all other chassis and electronics elements must be placed below the LiDAR sensor's plane of rotation.
+
+  
 
 ## Driving Base
 
@@ -192,15 +194,58 @@ The Geekservo has a housing with lego connections, so it can be used as a struct
 The MG90s requires additional strutural elements to build it in, which reduces the weight advantage.
 We already used the Geekservo last year and it worked well, so decision is to keep it.
 
+**Steering Geometry**
 
+The first step was to change the steering mechanism from a parallel steering geometry to Ackermann steering geometry.
 
+<img src="./v-photos/Ackermann_Steering_Geometry.png">
+
+There are two options how to build an Ackermann steering geometry, place the tie rod behind or in front of the axle.
+Both options had pros and cons. To find out the best configuration for our car, we had to run realistic tests.
+
+<img src="./v-photos/Compare_steering.png" width="70%">
+
+Our previous car had a fixed rear axle with two motors attached to it with a gearbox (see motorization). 
+In theory, to get the most out of Ackermann steering, the rear axle should have a differential.
+A differential gear in the rear axle would result in tighter turning circles as it allows the inner wheel of the rear axle to turn slower as the outer wheel and therefore run a smaller circle. 
+However, as space is tight and we must keep the driving base as flat as possible, this means to sacrifice a motor. 
+
+To find out which Ackermann Configuration works best and whether it is worth to rethink the motorization, we built a minimum test driving base and ran turning performance tests. We ran each combination several times and the calculated an average value for the measured turning circle. We measured the turning circle from outer rear wheel to outer rear wheel to be sure this is the minimum space our car needs to turn around in one go.
+
+<img src="./v-photos/Minimal_Fahrwerk.jpg" width="50%">
+
+**Tie rod behind front axle (classic Ackermann)**
+
+| Configuration          | Turning circle width |
+| ---------------------- | -------------------- |
+| fixed rear axle        | 49.5 cm              |
+| with differential gear | 43 cm                |
+
+**Tie rod in front of front axle** 
+
+| Configuration          | Turning circle width |
+| ---------------------- | -------------------- |
+| fixed rear axle        | 33.5 cm              |
+| with differential gear | 31.5 cm :heavy_check_mark:  |
+
+Decision: The configuration with tie rod in front of the rear axle and differential gear is best, we build that one. 
+The gained agility is worth using a differential gear.
 
 
 
 ### Motorization
 
-
 The resulting driving base looks like this:
+
+<img src="./v-photos/DB_03.jpg" width="70%">
+
+| Driving Base dimensions |         |
+| ----------------------- | ------- |
+| track width front       | 11.2 cm |
+| track width rear        | 12 cm   |
+| wheelbase               | 9 cm    |
+
+
 
 
 ### Mounts for electronics
