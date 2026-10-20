@@ -14,20 +14,20 @@ Roadrunners – Future Engineers 2026
 	- [Car Photos](#car-photos)
 - [Mobility & Mechanical Design](#mobility--mechanical-design)
 	- [Driving Base](#driving-base)	
-    - [Steering Mechanism](#Steering-Mechanism)
+    - [Steering Mechanism](#steering-mechanism)
     - [Motorization](#motorization)
 	- [Controllers](#controllers)
-- [Power & Sense Management](#Power--Sense-Management)  
-    - [Sensors](#Sensors)
+- [Power & Sense Management](#power--sense-management)  
+    - [Sensors](#sensors)
 		- [LiDAR](#lidar)
 		- [Cameras](#cameras)
 		- [Gyro](#gyro)
-	- [Power Management](#Power-management)
+	- [Power Management](#power-management)
 		- [Power Consumption Check](#power-consumption-check)
 		- [Power Supply](#power-supply)
 		- [Power Distribution](#power-distribution)
 		- [Wiring Diagram](#wiring-diagram)
-- [Software Architecture & Obstacle Management](#software-architecture--obstacle-management)
+- [Software Architecture & Obstacle Strategy](#software-architecture--obstacle-strategy)
 - [Debugging & Testing](#debugging--testing)
 - [Overall System & Engineering Decisions](#overall-system--engineering-decisions)
 	- [Development Goals](#development-goals)
@@ -75,15 +75,15 @@ Weaknesses in 2025 car:
 To improve at the weaknesses, a lot of technical decisions were necessary. As we discovered, many of them were not independent from each other and had impacts on strengths we wanted to keep.
 So at various points, design trade-offs were necessary between conflicting goals. 
 
-A major point in improvements was to use a LiDAR for sensing distances and mount it in a way that it has a free 360 degree field of view. We felt this would be helpful in solving various previous weaknesses during driving and parking. However, this goal had major implications on how to build the chassis and which electronics can be used. A detailed discussions is provided in the sections about chassis and LiDAR sensor.
+A major point in improvements was to use a LiDAR for sensing distances and mount it in a way that it has a free 360 degree field of view. We felt this would be helpful in solving various previous weaknesses during driving and parking. However, this goal had major implications on how to build the chassis and which electronics can be used. A detailed discussion is provided in the sections about chassis and LiDAR sensor.
 
 We sum up all the design trade-offs and the reasons for the final decisions in detail in the section [**Overall System & Engineering Decisions**](#overall-system--engineering-decisions).
 
-We thought a LiDAR sensor would solve a lot of our dead angle problems. However, to be useful when manouevering within the parking box and while driving on the parcours as well, it would ideally have a full 360 degree unblocked field of view. 
+We thought a LiDAR sensor would solve a lot of our dead angle problems. However, to be useful when manoeuvring within the parking box and while driving on the parcours as well, it would ideally have a full 360 degree unblocked field of view. 
 
 - Goal 1: Redesign chassis to support a true 360 degree FoV LiDAR
 
-- Goal 2: Achive better agility (smaller turning circle)
+- Goal 2: Achieve better agility (smaller turning circle)
 
 - Goal 3: Redesign Software to make use of 360 degree LiDAR
 
@@ -93,11 +93,11 @@ We thought a LiDAR sensor would solve a lot of our dead angle problems. However,
 
 Apart from specific goals for this season, we have defined some general engineering rules for ourselves.
 
-- Precision before speed
+- Precision before speed  
 A better precision makes it more likely to run without driving errors. So it ranks higher than running at higher speed.
 
-- Test new ideas early 
-Test early wether a new idea is helpful with prototypes. Find drawbacks as early as possible.
+- Test new ideas early  
+Test early whether a new idea is helpful with prototypes. Find drawbacks as early as possible.
 
 - Always have a backup
 
@@ -114,7 +114,7 @@ Test early wether a new idea is helpful with prototypes. Find drawbacks as early
 
 | Property                  | Value                                                        |
 | ------------------------- | ------------------------------------------------------------ |
-| Height                    | 9,5 cm                                                       |
+| Height                    | 9.5 cm                                                       |
 | Width                     | 13,5 cm                                                      |
 | Length                    | 18,8 cm                                                      |
 | Weight                    | 572 g                                                        |
@@ -150,11 +150,11 @@ The chassis of the Roadrunner is constructed in two layers:
 - the driving base consists of a rear axle block with motor and gearing and the front axle block containing the steering mechanism and servo
 - the electronics layer contains controllers and sensors
 
-Our previous roadrunner car has been build from lego technic parts and we decided to keep it that way. Lego Technic is a rather sturdy material and we have lots of technic parts from other lego robotic projects in the past. 
+Our previous roadrunner car has been built from lego technic parts and we decided to keep it that way. Lego Technic is a rather sturdy material and we have lots of technic parts from other lego robotic projects in the past. 
 
-The alternative would have been to build the chassis in 3D-printing. However, rapid prototyping, testing new ideas, new placements, other gearings etc is faster with already pre-produced parts and later changes, e.g. for surprise rules,  are easier to be applied to a lego chassis.
+The alternative would have been to build the chassis in 3D-printing. However, rapid prototyping, testing new ideas, new placements, other gearings etc is faster with already pre-produced parts and later changes, e.g. for surprise rules, are easier to be applied to a lego chassis.
 
-To be able to use a LiDAR with 360 degree FoV  (goal 1 for this season, see above), 
+To be able to use a LiDAR with 360 degree FoV (goal 1 for this season, see above), 
 
 - the LiDAR must be mounted so its sensor's plane of rotation is significantly below 10 cm wall and obstacles height
 
@@ -170,7 +170,7 @@ This year, we used the smaller variant, the 43x14 mm Spike Prime wheels. With th
 <img src="./v-photos/wheels.png" width="30%">
 
 - Advantage: new wheels have same width and grip as before but save height in axle position and overall height.
-- Disadvantage: smaller wheels decrease th maximum speed and therefore contradict goal 4. 
+- Disadvantage: smaller wheels decrease the maximum speed and therefore contradict goal 4. 
 
 According to rule precision before speed, this is acceptable.
 
@@ -183,15 +183,15 @@ To achieve goal 3, more agility, we tested some steering system variants.
 
 |             | Geekservo Grey 360 | MG90S Micro Servo |
 | ----------- | ------------------ | ----------------- |
-|             |<img src="./v-photos/servo.jpg">|<img src="./v-photos/mg90s.jpg" style="zoom:25%;" >|
+|             |<img src="./v-photos/Servo.jpg">|<img src="./v-photos/mg90s.jpg" width="131">|
 | Voltage     |       4.8 - 6V     |   4.8 - 6V        |
 | Torque      |    2 kg/cm at 5V   |   2 kg/cm at 5V   |
 | Weight      |        20g         |       13.4g       |
 | Form Factor |     24x24x40mm     |     23x12x29mm    |
 
-The MG90S is is little bit lighter as the Geekservo. 
+The MG90S is a little bit lighter than the Geekservo. 
 The Geekservo has a housing with lego connections, so it can be used as a structural element and combines with Lego very easily.
-The MG90s requires additional strutural elements to build it in, which reduces the weight advantage.
+The MG90s requires additional structural elements to build it in, which reduces the weight advantage.
 We already used the Geekservo last year and it worked well, so decision is to keep it.
 
 **Steering Geometry**
@@ -207,10 +207,10 @@ Both options had pros and cons. To find out the best configuration for our car, 
 
 Our previous car had a fixed rear axle with two motors attached to it with a gearbox (see motorization). 
 In theory, to get the most out of Ackermann steering, the rear axle should have a differential.
-A differential gear in the rear axle would result in tighter turning circles as it allows the inner wheel of the rear axle to turn slower as the outer wheel and therefore run a smaller circle. 
+A differential gear in the rear axle would result in tighter turning circles as it allows the inner wheel of the rear axle to turn slower than the outer wheel and therefore run a smaller circle. 
 However, as space is tight and we must keep the driving base as flat as possible, this means to sacrifice a motor. 
 
-To find out which Ackermann Configuration works best and whether it is worth to rethink the motorization, we built a minimum test driving base and ran turning performance tests. We ran each combination several times and the calculated an average value for the measured turning circle. We measured the turning circle from outer rear wheel to outer rear wheel to be sure this is the minimum space our car needs to turn around in one go.
+To find out which Ackermann Configuration works best and whether it is worth to rethink the motorization, we built a minimum test driving base and ran turning performance tests. We ran each combination several times and then calculated an average value for the measured turning circle. We measured the turning circle from outer rear wheel to outer rear wheel to be sure this is the minimum space our car needs to turn around in one go.
 
 <img src="./v-photos/Minimal_Fahrwerk.jpg" width="50%">
 
@@ -258,13 +258,13 @@ Detailed building instructions for the resulting chassis and the bill of materia
 
 ## Controllers
 
-- previous car: separate motor controller ans servo controller.
-- this year: goal: use combined controller to save space and buils flat enough for LiDAR
-- test 3 types: adeept robot hat 3.0, waveshare robot driver hat and seengrat motor and servo hat.
+- previous car: separate motor controller and servo controller.
+- this year: goal: use combined controller to save space and build flat enough for LiDAR
+- test 3 types: adeept robot hat 3.0, waveshare robot driver hat and Seengreat motor and servo hat.
 - problem: only 1 pca9685 pwm driver for both motor pwm and servo pwm.
-  servo: needs 50 Hz pwm frequency, motors: typically uses a lot higher frequency -> not possible with only 1 pwm driver
-  original lego PFL Motor rattles loudly at low speed and 50 Hz, CaDa rattles much less due to better gearing quality
-  disadvantage 1 pwm driver acceptable for CaDa motor, so combined but smaller controller is better
+  - servo: needs 50 Hz pwm frequency, motors: typically uses a lot higher frequency -> not possible with only 1 pwm driver
+  - original lego PFL Motor rattles loudly at low speed and 50 Hz, CaDa rattles much less due to better gearing quality
+  - disadvantage 1 pwm driver acceptable for CaDa motor, so combined but smaller controller is better
   
 
 
@@ -327,13 +327,13 @@ If a cable comes loose, this graphic helps to put it back in place easily.
 - chassis height (wheel size) and speed
 - speed and rear axle gearing
 - motor choice: speed, gearing and pwm frequency stability
-- previous car: separate motor controller ans servo controller.
-- this year: goal: use combined controller to save space and buils flat enough for LiDAR
-- test 3 types: adeept robot hat 3.0, waveshare robot driver hat and seengrat motor and servo hat.
+- previous car: separate motor controller and servo controller.
+- this year: goal: use combined controller to save space and build flat enough for LiDAR
+- test 3 types: adeept robot hat 3.0, waveshare robot driver hat and Seengreat motor and servo hat.
 - problem: only 1 pca9685 pwm driver for both motor pwm and servo pwm.
-  servo: needs 50 Hz pwm frequency, motors: typically uses a lot higher frequency -> not possible with only 1 pwm driver
-  original lego PFL Motor rattles loudly at low speed and 50 Hz, CaDa rattles much less due to better gearing quality
-  disadvantage 1 pwm driver acceptable for CaDa motor, so combined but smaller controller is better
+  - servo: needs 50 Hz pwm frequency, motors: typically uses a lot higher frequency -> not possible with only 1 pwm driver
+  - original lego PFL Motor rattles loudly at low speed and 50 Hz, CaDa rattles much less due to better gearing quality
+  - disadvantage 1 pwm driver acceptable for CaDa motor, so combined but smaller controller is better
 
 - LiDAR and Camera position
 - LiDAR, python GIL and software design
@@ -345,7 +345,7 @@ If a cable comes loose, this graphic helps to put it back in place easily.
 
 ## Software Modules
 
-- Rasbian Bookworm Operating System
+- Raspbian Bookworm Operating System
 - OpenCV image processing
 - Adafruit Blinka (Interface to circuitpython/micropython libs for electronic hardware modules)
 - Adafruit_CircuitPython_BNO08x
