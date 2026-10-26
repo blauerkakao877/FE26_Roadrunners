@@ -179,21 +179,6 @@ According to rule precision before speed, this is acceptable.
 
 To achieve goal 3, more agility, we tested some steering system variants.
 
-**Steering Servo Options**
-
-|             | Geekservo Grey 360 | MG90S Micro Servo |
-| ----------- | ------------------ | ----------------- |
-|             |<img src="./v-photos/Servo.jpg">|<img src="./v-photos/mg90s.jpg" width="131">|
-| Voltage     |       4.8 - 6V     |   4.8 - 6V        |
-| Torque      |    2 kg/cm at 5V   |   2 kg/cm at 5V   |
-| Weight      |        20g         |       13.4g       |
-| Form Factor |     24x24x40mm     |     23x12x29mm    |
-
-The MG90S is a little bit lighter than the Geekservo. 
-The Geekservo has a housing with lego connections, so it can be used as a structural element and combines with Lego very easily.
-The MG90s requires additional structural elements to build it in, which reduces the weight advantage.
-We already used the Geekservo last year and it worked well, so decision is to keep it.
-
 **Steering Geometry**
 
 The first step was to change the steering mechanism from a parallel steering geometry to Ackermann steering geometry.
@@ -231,9 +216,8 @@ To find out which Ackermann Configuration works best and whether it is worth to 
 Decision: The configuration with tie rod in front of the rear axle and differential gear is best, we build that one. 
 The gained agility is worth using a differential gear.
 
+Steering Servo selection: see Motorization
 
-
-### Motorization
 
 The resulting driving base looks like this:
 
@@ -245,27 +229,113 @@ The resulting driving base looks like this:
 | track width rear        | 12 cm   |
 | wheelbase               | 9 cm    |
 
+### Motorization
+
+**Driving Motor Options**
+
+We needed a motor compatible to the Lego Power Functions L motor form factor to fit seamlessly in our driving base. We had decided to change our last years motor configuration to only one motor with a differential gear.  So we tested two possible motors together with two variants of differential gears. One gearbox provided a 1:1 gear ratio, the other one a 20:28 = 1:1.4 ratio reducing speed but increasing torque.
+
+Goal: Choose a motor and gear combination, that
+
+- has enough torque at low voltage to drive our car slow enough for parking
+- has enough rpm to drive fast enough to get good round times
+
+Torque needed to get rolling: 
+
+Weight: 572g,  Wheel radius:  22mm,  estimated rolling friction coefficient: 0.05
+$$
+Force: F =0.57 kg  * 9.81 m/s^2 * 0.05 = 0.28 N
+$$
+
+$$
+Torque wheel: M = 0.28 N * 0.022 cm = 0.006 N/cm
+$$
+
+CaDa does not publish official numbers on torque, but community tests (YouTube) demonstrated it having more torque than the original Lego PF-L motor or Mould King L motor. To be sure about the performance, we tested with both motors in our car.
+
+|                      | Mould King M3                                            | CaDa L Motor Pro                                             |
+| -------------------- | -------------------------------------------------------- | ------------------------------------------------------------ |
+|                      | <img src="./v-photos/MouldKing_L_Motor.jpg" width="200"> | <img src="./v-photos/cada-l-motor-pro-cjv5028.jpg" width="200"> |
+| no load rpm          | 500 r/min                                                | 1200 r/min                                                   |
+| voltage              | 9V                                                       | 9V                                                           |
+| min speed 1:1 gear   | 0.14 m/sec                                               | 0.13 m/sec                                                   |
+| min speed 1:1.4 gear | 0.1 m/sec                                                | 0.1 m/sec                                                    |
+| max speed 1:1 gear   | 1.1 m/sec                                                | 1.58 m/sec                                                   |
+| max speed 1:1.4 gear | 0.85 m/sec                                               | 1.13 m/sec                                                   |
+|                      |                                                          | :heavy_check_mark:                                           |
+
+The CaDa minimum speed  at 1:1 gear ratio is still slow enough to drive safely in the parking box an it has the best maximum speed. Additionally, it has metal internal gears which are sturdier than the plastic gears of the Mould King.
+
+Decision: We use the CaDa L Motor Pro with the 1:1 ratio differential gear.
 
 
 
-### Mounts for electronics
 
-Center of gravity:
+**Steering Servo Options**
 
+|             | Geekservo Grey 360 | MG90S Micro Servo |
+| ----------- | ------------------ | ----------------- |
+|             |<img src="./v-photos/Servo.jpg">|<img src="./v-photos/mg90s.jpg" width="131">|
+| Voltage     |       4.8 - 6V     |   4.8 - 6V        |
+| Torque      |   2 kg/cm at 5V (20N/cm)   |   2 kg/cm at 5V (20N/cm)   |
+| Weight      |        20g         |       13.4g       |
+| Form Factor |     24x24x40mm     |     23x12x29mm    |
+|  | :heavy_check_mark: |  |
 
-Detailed building instructions for the resulting chassis and the bill of materials can be found in [**Building_Instructions**](./Building_Instructions/README.md).
+The MG90S is a little bit lighter than the Geekservo. 
+The Geekservo has a housing with lego connections, so it can be used as a structural element and combines with Lego very easily.
+The MG90s requires additional structural elements to build it in, which reduces the weight advantage.
+We already used the Geekservo last year and it worked well, so decision is to keep it.
 
 
 ## Controllers
 
-- previous car: separate motor controller and servo controller.
-- this year: goal: use combined controller to save space and build flat enough for LiDAR
-- test 3 types: adeept robot hat 3.0, waveshare robot driver hat and Seengreat motor and servo hat.
-- problem: only 1 pca9685 pwm driver for both motor pwm and servo pwm.
-  - servo: needs 50 Hz pwm frequency, motors: typically uses a lot higher frequency -> not possible with only 1 pwm driver
-  - original lego PFL Motor rattles loudly at low speed and 50 Hz, CaDa rattles much less due to better gearing quality
-  - disadvantage 1 pwm driver acceptable for CaDa motor, so combined but smaller controller is better
-  
+As main controller, we use a Raspberry Pi 5.
+
+<img src="./v-photos/raspberry_pi.png" width="30%">
+
+Our previous car had a Raspberry Pi as its main controller and separate motor driver board, servo driver board and step downs.
+This needed a lot of space. For this years goal, build as flat as possible, we wanted to use an integrated HAT providing all or most of these functions with a much smaller footprint.
+We evaluated 3 different models: 
+Adeept Robot HAT V3, Waveshare general Driver Board and Seengreat Motor and Servo HAT.
+All 3 fulfilled the requirements:
+
+- motor driver
+- servo driver
+- 5V step-down
+- can power the Raspberry Pi directly
+- main on/off switch
+
+The 5V step-downs all supported up to 3A, so no difference here.
+So we used the resulting height and width and ease to attach sensors as the criterion to select one.
+On the images right to left: Adeept, Waveshare, Seengreat
+
+Height:
+
+<img src="./v-photos/Compare_Controllers1.jpeg" width="70%">
+
+Adeept is higher that the others, which is bad for the LiDAR mounting position.
+Additionally, Raspberry Pi headers are not directly accessible
+
+Width:
+
+<img src="./v-photos/Compare_controllers2.jpeg" width="70%">
+
+The Waveshare is broader that the others and the Headers are not easy accessible.
+The Seengreat has the smallest footprint (Bonnet form factor) and all Raspberry Pi headers are freely accessible.
+We chose the Seengreat Motor and Servo Driver HAT.
+Drawback: The Seengreat has only one PWM Driver (PCA9685) for both servo and motor pwm.
+The servo needs 50 Hz pwm frequency. Motors typically use much higher frequencies to avoid rattling at slower speeds.
+However, this is not possible with only one PWM controller.
+The CaDa motor rattled a lot less than the other motors tested, so motor rattling is not an issue with this one.
+
+### Mounts for electronics
+
+To mount the electronic elements as controllers and sensors, we added some structural supports.
+
+<img src="./v-photos/Support_elements.jpg" width="70%">
+
+Detailed building instructions for the resulting chassis and the bill of materials can be found in [**Building_Instructions**](./Building_Instructions/README.md).
 
 
 # Power & Sense Management 
