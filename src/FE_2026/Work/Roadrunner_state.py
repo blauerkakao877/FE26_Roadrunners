@@ -41,7 +41,7 @@ class State:
         self.winkel = 0.0
         self.gesamt = 0.0
         self.k = 0.6
-        self.drift_kor = 0.2
+        self.drift_kor = 0.3 #0.2
         
         # Ende
         self.stop_time = 0.0
@@ -59,7 +59,7 @@ class State:
         self.hindernis = False
         self.hindernis_sperre = False
         self.h_zeit = 0.0
-        self.h_warten = 0.45 #0.5
+        self.h_warten = 0.45
         self.kh = 0.4 #0.3
         self.letzte_farbe = "N"
         self.h_avoid_until = 0.0
@@ -69,6 +69,10 @@ class State:
         self.LDL = 0
         self.LDR = 0
         self.LDV = 0
+        
+        self.Lidarsperre_L = False
+        self.Lidarsperre_V = False
+        self.Lidarsperre_R = False
         
         #Parken
         self.eingeparkt = False

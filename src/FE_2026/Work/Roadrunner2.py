@@ -58,7 +58,6 @@ class Roadrunner:
         self.D.wait_for_button_press()
         time.sleep(0.1)
         self.L.all_off()
-        time.sleep(0.1)
         self.G.start()
         self.LD.send_start_signal()
         time.sleep(0.2)
@@ -461,7 +460,7 @@ class Roadrunner:
             self.WL.write_Log("Lidar verhindert lenken nach links/geradeaus")
             
             
-        if (offset > 0) and (self.state.LDR < 130) and (self.state.LDL > 0 ):
+        if (offset > 0) and (self.state.LDR < 130) and (self.state.LDR > 0):
             #offset = 0
             offset = -5
             self.L.on(2, PINK)
@@ -506,6 +505,10 @@ class Roadrunner:
         _, self.state.LDR = self.LD.getMin_Dist_Bereich_RR(0, 100) #90
         _, self.state.LDL = self.LD.getMin_Dist_Bereich_RR(260, 0) #270
         _, self.state.LDV = self.LD.getMin_Dist_Bereich_RR(353, 7)
+        
+        self.state.Lidarsperre_L = False
+        self.state.Lidarsperre_V = False
+        self.state.Lidarsperre_R = False
             
     # -------------------- PARKEN -------------------- 
     def einparken_l(self):
@@ -689,7 +692,7 @@ class Roadrunner:
         
         ########################
         if self.parken_paral:
-            self.einparken_paral()
+            self.einparken_paral(1620)
         ########################
     
     def einparken_r(self):
@@ -835,71 +838,76 @@ class Roadrunner:
             self.einparken_paral()
         ########################
         
-    def einparken_paral(self):
+    def einparken_paral(self, gyro_offset=0):
+        # gyro_offset: Auto steht nach beiden Richtungen gleich, nur die Gyro-Werte unterscheiden sich
+        abstand_min = 25   # Lidar-Abbruch vorne/hinten (vorher 15)
+        vorhalt = 3        # Grad früher stoppen, weil das Auto nachdreht
         self.state.eingeparkt = False
-        self.WL.write_Log("starte einparken_paral")
-        
+        self.WL.write_Log("starte einparken_paral, gyro_offset: "+str(gyro_offset))
+
         self.state.winkel, self.state.gesamt = self.G.WinkelMessen()
+        self.state.gesamt += gyro_offset
         _, self.LDL = self.LD.getMin_Dist_Bereich_RR(260, 280)
         _, self.LDR = self.LD.getMin_Dist_Bereich_RR(80, 100)
-        
-        
-        #if self.state.gesamt <= 0:
-            #self.state.gesamt = self.state.gesamt + 1620
-        #self.state.geradeaus = 810 #geradeaus zur parklücke -90 nach L +90 nach R
-        
-        if self.state.gesamt > self.state.geradeaus and self.state.LDR > 50:
-            self.state.current_direction = "l"
-            self.WL.write_Log("Baustelle")
-            
-            
-            
-        elif self.state.gesamt <= self.state.geradeaus and self.state.LDL > 50:
+
+        if self.LDL > 50:
             self.state.current_direction = "r"
             self.state.geradeaus = 720
-            
+            ziel = self.state.geradeaus + vorhalt
+
+            # -------- ZUG 1: Vor + links --------
             _, self.LDV_P = self.LD.getMin_Dist_Bereich_RR(270, 90)
             self.D.nach_links()
             self.D.vor(0.1)
-            while self.LDV_P > 15 and self.state.gesamt <= self.state.geradeaus:
+            while self.LDV_P > abstand_min and self.state.gesamt >= ziel:
                 _, self.LDV_P = self.LD.getMin_Dist_Bereich_RR(270, 90)
-                self.WL.write_Log("Minimale Distanz Vorne: "+str(self.LDV_P))
                 self.state.winkel, self.state.gesamt = self.G.WinkelMessen()
-                self.WL.write_Log("Winkel: "+str(self.state.gesamt))
-                time.sleep(0.1)
+                self.state.gesamt += gyro_offset
+                self.WL.write_Log("Vorne: "+str(self.LDV_P)+" Winkel: "+str(self.state.gesamt))
+                time.sleep(0.02)
+            self.D.stop()
+            time.sleep(0.15)
 
-            if self.state.gesamt <= self.state.geradeaus:
+            if self.state.gesamt >= ziel:
                 # Winkel NICHT erreicht -> Abbruch war wegen Lidar -> weiter mit Zug 2
                 self.WL.write_Log("Zug 1 durch Lidar abgebrochen, Winkel noch nicht erreicht -> Zug 2")
 
+                # -------- ZUG 2: Rück + rechts --------
                 _, self.LDH_P = self.LD.getMin_Dist_Bereich_RR(90, 270)
                 self.D.nach_rechts()
                 self.D.ruck(0.1)
-                while self.LDH_P > 15 and self.state.gesamt <= self.state.geradeaus:
+                while self.LDH_P > abstand_min and self.state.gesamt >= ziel:
                     _, self.LDH_P = self.LD.getMin_Dist_Bereich_RR(90, 270)
-                    self.WL.write_Log("Minimale Distanz Hinten: "+str(self.LDH_P))
                     self.state.winkel, self.state.gesamt = self.G.WinkelMessen()
-                    self.WL.write_Log("Winkel: "+str(self.state.gesamt))
-                    time.sleep(0.1)
+                    self.state.gesamt += gyro_offset
+                    self.WL.write_Log("Hinten: "+str(self.LDH_P)+" Winkel: "+str(self.state.gesamt))
+                    time.sleep(0.02)
+                self.D.stop()
+                time.sleep(0.15)
 
-                if self.state.gesamt <= self.state.geradeaus:
+                if self.state.gesamt >= ziel:
                     # auch hier: Winkel noch nicht erreicht -> Zug 3
                     self.WL.write_Log("Zug 2 durch Lidar abgebrochen, Winkel noch nicht erreicht -> Zug 3")
 
+                    # -------- ZUG 3: Vor + links --------
                     _, self.LDV_P = self.LD.getMin_Dist_Bereich_RR(270, 90)
                     self.D.nach_links()
                     self.D.vor(0.1)
-                    while self.LDV_P > 15 and self.state.gesamt <= self.state.geradeaus:
+                    while self.LDV_P > abstand_min and self.state.gesamt >= ziel:
                         _, self.LDV_P = self.LD.getMin_Dist_Bereich_RR(270, 90)
-                        self.WL.write_Log("Minimale Distanz Vorne: "+str(self.LDV_P))
                         self.state.winkel, self.state.gesamt = self.G.WinkelMessen()
-                        self.WL.write_Log("Winkel: "+str(self.state.gesamt))
-                        time.sleep(0.1)
+                        self.state.gesamt += gyro_offset
+                        self.WL.write_Log("Vorne: "+str(self.LDV_P)+" Winkel: "+str(self.state.gesamt))
+                        time.sleep(0.02)
+                    self.D.stop()
                 else:
                     self.WL.write_Log("Zug 2: Winkel bereits erreicht, überspringe Zug 3")
             else:
                 self.WL.write_Log("Zug 1: Winkel bereits erreicht, überspringe Zug 2 und 3")
 
+            self.D.gerade()
+            self.state.winkel, self.state.gesamt = self.G.WinkelMessen()
+            self.WL.write_Log("Endwinkel: "+str(self.state.gesamt + gyro_offset))
             self.state.eingeparkt = True
 
         
@@ -957,11 +965,11 @@ class Roadrunner:
                 "linie_zaehlen_first": 0.7
             },
             "medium": {
-                "endstop": 2.3,
-                "run_speed": 0.55,
-                "linie_warten": 2.0,
-                "linie_zaehlen": 0.47, #0.5
-                "linie_zaehlen_first": 0.55
+                "endstop": 1.3,
+                "run_speed": 0.47,
+                "linie_warten": 1.0,
+                "linie_zaehlen": 0.19, #0.22
+                "linie_zaehlen_first": 0.25 #0.35
             },
             "fast": {
                 "endstop": 1.2, #1.2
@@ -987,8 +995,8 @@ class Roadrunner:
         self.state.linie_zaehlen = preset["linie_zaehlen"]
         self.state.linie_zaehlen_first = preset["linie_zaehlen_first"]
 
-        time.sleep(0.2)
-        self.D.vor(0.5) #self.speed / 0.3
+        #time.sleep(0.2)
+        self.D.vor(0.3)
 
         while self.state.Rennen_laeuft and not self.D.button_pressed():
             
@@ -1146,6 +1154,8 @@ class Roadrunner:
             preset = presets["medium"]
         elif self.state.fast:
             preset = presets["fast"]
+        else:
+            preset = presets["slow"]
 
 
         self.speed = preset["run_speed"]
@@ -1178,7 +1188,7 @@ class Roadrunner:
         # ================= PARKTEST =================
         if self.parktest:
             
-            self.state.current_direction == "r"
+            self.state.current_direction = "r"
             
             # Start direkt vor der letzten Kurve
             # Die nächste Linie ist Linie 12
@@ -1194,7 +1204,7 @@ class Roadrunner:
                 self.state.geradeaus = 990
                 self.state.gesamt = 990
 
-            self.state.stop_time = time.time + 3.0
+            self.state.stop_time = time.time() + 3.0
             self.stop_time_set = False
 
             # Keine alte erkannte Linie übernehmen
@@ -1314,6 +1324,32 @@ class Roadrunner:
                     (255, 0, 255),
                     4
                 )
+                
+            # ---- Lidar sperren markieren ----  
+            if self.state.Lidarsperre_L:
+                cv2.line(
+                    record_img,
+                    (record_img.shape[1]-200, 0),
+                    (record_img.shape[1]-200, record_img.shape[0]),
+                    (255, 255, 0),
+                    4
+                )
+            if self.state.Lidarsperre_V:
+                cv2.line(
+                    record_img,
+                    (record_img.shape[1]-159, 0),
+                    (record_img.shape[1]-159, record_img.shape[0]),
+                    (255, 255, 0),
+                    4
+                )
+            if self.state.Lidarsperre_R:
+                cv2.line(
+                    record_img,
+                    (record_img.shape[1]-120, 0),
+                    (record_img.shape[1]-120, record_img.shape[0]),
+                    (255, 255, 0),
+                    4
+                )
 
             # ---- Frame speichern ----
             self.C.write_frame(record_img)
@@ -1341,9 +1377,9 @@ class Roadrunner:
                 self.WL.write_Log("links: "+str(self.links))
                 if self.state.slow:
                     if self.state.gesamt <= self.state.geradeaus + 60:
-                        self.D.steer(+25)
+                        self.D.steer(+20)
                     else:
-                        self.D.steer(-25)
+                        self.D.steer(-20)
                         
                 elif self.state.medium:
                     if self.state.gesamt <= self.state.geradeaus + 60:
@@ -1356,9 +1392,9 @@ class Roadrunner:
                 self.WL.write_Log("rechts: "+str(self.rechts))
                 if self.state.slow:
                     if self.state.gesamt >= self.state.geradeaus - 60:
-                        self.D.steer(-25)
+                        self.D.steer(-20)
                     else:
-                        self.D.steer(+25)
+                        self.D.steer(+20)
                         
                 elif self.state.medium:
                     if self.state.gesamt >= self.state.geradeaus - 60:
@@ -1369,7 +1405,8 @@ class Roadrunner:
             elif self.state.LDV < 80 and self.state.LDV > 0: #70
                 special = True
                 self.pink_last = time.time()
-                self.WL.write_Log("Lidar vorne < 70: "+str(self.state.LDV))
+                self.state.Lidarsperre_V = True
+                self.WL.write_Log("Ruck fahren, weil Lidar vorne < 70: "+str(self.state.LDV))
                 self.D.gerade()
                 self.D.ruck(0.3)
                 time.sleep(1.0)
@@ -1423,6 +1460,7 @@ class Roadrunner:
                         lenkwinkel = 91
                         self.L.on(2, PINK)
                         self.pink_last = time.time()
+                        self.state.Lidarsperre_R = True
                         self.WL.write_Log("Lidar verhindert lenken nach rechts/Hindernis rot")
                         
                     #self.WL.write_Log("lenkwinkel rot: " + str(lenkwinkel))
@@ -1481,6 +1519,7 @@ class Roadrunner:
                         lenkwinkel = 101
                         self.L.on(2, PINK)
                         self.pink_last = time.time()
+                        self.state.Lidarsperre_L = True
                         self.WL.write_Log("Lidar verhindert lenken nach links/Hindernis grun")
                     
                     if self.state.gesamt > self.state.geradeaus - 80:
@@ -1535,4 +1574,3 @@ class Roadrunner:
 if __name__ == "__main__":
     rr = Roadrunner()
     rr.safe_run()
-    
