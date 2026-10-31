@@ -342,16 +342,53 @@ Detailed building instructions for the resulting chassis and the bill of materia
 
 ## Sensors
 
+Our analysis of the weaknesses in our previous car model led us to develop a revised sensor design. We continue to use a gyro (IMU) sensor to determine our orientation on the field. Using one front and one rear camera, we detect lines, obstacles, and walls in the camera’s field of view along the direction of travel. In the immediate vicinity in front of and beside the car, we’ve added a LiDAR sensor to detect objects near the car that the camera cannot (or can no longer) see.
+
 ### LiDAR
+
+In the previous version of our car, we had an ultrasonic sensor in the front and infrared sensors on the sides. The ultrasonic sensor measured distances in front of the car, while the infrared sensors could only trigger an alarm if something came too close. In the current version, we have replaced them with a LiDAR STL-19P sensor. 
+
+The LiDAR can accurately measure distances in all directions, but it only updates 10 times per second in the same direction. The ultrasonic sensor was only accurate up to about 1 meter, and even then only if the sensor wasn't angled toward the obstacle or wall. The infrared sensors were quite inaccurate and useless on shiny surfaces.
+
+To be able to use the LiDAR while reversing, it must have a 360-degree field of view. This means it must be able to see over all other car components, but it must be mounted significantly lower than 10 cm in order to still detect obstacles and walls. The manufacturer specifies a maximum deviation of 0.2 degrees up or down for the laser. To ensure that the LiDAR does not look beyond the 10 cm mark too early in the more important forward direction due to this inaccuracy, we have tilted it very slightly forward using a thin plastic washer. We have at least one meter of accurate measurement to the front, and to the rear we still have at least 30 cm of measurement range, which is sufficient for our purposes. For each scan, we normalize each of the 360 supplied angle values to a whole number so that we have fixed angular positions.
 
 ### Cameras
 
+To detect obstacles, lines, and walls, you’ll also need a camera. To ensure the Raspberry Pi can see as much of the playing field as possible, we chose two wide-angle cameras: the Raspberry Pi V3 Wide 5K camera. We mounted the front camera at a slight angle, directly below the LiDAR sensor. We use these cameras during normal driving to detect obstacles, lines, and walls. The slight tilt ensures that, despite the low position, there are very few non-playing-field areas in the image that we need to crop out. We use the rear camera when parking to look behind us. We use a reduced image resolution of 320x240 pixels so that we can process the images quickly enough. This allows us to capture approximately 25 images per second. The camera theoretically has a field of view of 120 degrees. Due to the camera’s position and the field of view, we’ve measured that we can actually only use an angle of 85 degrees. A higher camera position would actually be better, but then the LiDAR wouldn’t be able to see over the camera, so we had to make a compromise. To ensure accurate color recognition, we increased the brightness and color contrast in the camera settings. To adjust the thresholds for filtering out a color based on local lighting conditions, we wrote a calibration program that writes the thresholds for all colors to a configuration file, which the car reads upon startup.
+
 ### Gyro
 
+To determine the car’s current orientation on the field and its cumulative total rotation, we use an IMU sensor (gyro + accelerometer), the Adafruit BNO085 sensor. This sensor is mounted horizontally at the front, aligned with the car’s longitudinal axis. The sensor has a special operating mode called Game Rotation Vector, which allows it to continuously calculate the orientation relative to the starting position. When the gyro starts up, it automatically calibrates itself so that the current orientation is set as the zero orientation. The BNO085 also has a built-in chip that automatically combines the gyroscope and accelerometer data so that we can read the corrected angles directly. A common problem is gyro drift. This occurs when the measured angle does not return exactly to its initial value after a rotational movement, causing the measurement error to accumulate with each lap driven. With the BNO085, the drift is very low due to the combination with the accelerometer, but it is still noticeable. According to the manufacturer’s datasheet, it amounts to approximately 1.5 degrees per full 360-degree rotation. Since this drift is fairly constant, we compensate for it by adding an offset every 90 degrees.
 
 ## Power Management
 
+For our new design, we wanted to significantly reduce both the weight and the height. For this reason, we looked for a motor and servo controller with a built-in 5V step-down converter that could also power the Pi. And we wanted to use the smallest possible battery. This required us to perform precise measurements and calculations to ensure that the chosen power source would actually be sufficient to safely power the car through an entire race. Previously, we had used relatively generously sized batteries and hardly ever questioned their capacity. Now, however, we are forced to plan and calculate much more precisely.
+
+
+
+According to tests on Philohome (see sources), the drive motor consumes approximately 500 mA (~5 W) at 10 V under load. 
+
+This presents a problem. The 5 V step-down regulator on the motor driver delivers a total of only 3 A/15 W. The Raspberry Pi 5 alone can draw up to 5 A, which is already too much. So we had to measure exactly what the realistic power consumption is. The LiDAR and cameras are powered directly by the Raspberry Pi, meaning their impact can be seen in the Pi’s total power consumption.
+
 ### Power Consumption Check
+
+Seengreat Motor Controller 5V/3A Step-Step-Down: 
+
+- Designed to supply 5V to the Raspberry Pi, servo, and LEDs. Raspberry Pi Test Scenario: 
+
+- Powered via USB-C through a test device.
+
+   Two processes are running on the Pi: one reads and processes camera images as quickly as possible, while the other reads and decodes LiDAR measurement data as quickly as possible.
+
+
+
+The motor controller can handle up to 15 W → fits 16.2 W total power consumption of the car: 16.2 W, max. 20 W is possible (5 W motor + 15 W on the motor controller) For the battery, we’re using the Red Power XT with a capacity of 1,100 mAh and a voltage of 7.4 V (= 8.1 Wh), which is small enough but still provides sufficient runtime.
+
+
+
+Purely mathematically speaking, the battery runs out after about 20 minutes at maximum load. That's more than enough to complete a race without running out of power.
+
+This results in the following block diagram of the power supply in our car:
 
 ### Power Supply
 
@@ -379,16 +416,79 @@ If a cable comes loose, this graphic helps to put it back in place easily.
 
 # Software Architecture & Obstacle Strategy 
 
+Code Development
+
+ We developed our code in Python on a Raspberry Pi 5. To interface with the sensors and the motor driver board, we used the corresponding CircuitPython libraries from Adafruit. For image processing, we use the OpenCV library. We developed our functions for reading LiDAR data based on the GitHub project nannigalaxy/ldrobot_lidar. The LiDAR sensor generates high data rates that must be quickly retrieved and processed to ensure we always have up-to-date distance data in all directions. At the same time, the camera images must be read and analyzed quickly enough. The Raspberry Pi 5 has 4 processor cores and thus sufficient computing power. However, due to Python’s architecture, all threads of a Python script always run on the same core. To truly run both tasks in parallel and utilize two cores for this purpose, we have split our software into two processes. The `lidar_reader` process, which processes the LiDAR measurement values, makes these available to the `roadrunner2` main process via shared memory. Since Rule 6.14 prohibits the processing of any measurement values before the start button has been pressed, we have created a second shared memory to provide a start signal to downstream processes. 
+
+Flowchart:
+
+
+
+Software Modules: Base Classes At the lowest level are base classes that encapsulate the respective hardware components. We have combined the motor and servo into a *DrivingBase* class, which provides all motion functions. LiDAR, the gyro, the camera, and the LEDs are each separate classes. The gyro class not only provides the current orientation on the playing field but also the cumulative total rotation since startup. The camera function already provides a BGR (Blue-Green-Red) image and an HSV (Hue-Saturation-Value) image to make it easier to filter colors. We manage the car’s current state and all the information needed for the next steering decision in a RoadrunnerState class. We use GitHub for source code management.
+
+Preprocessing:
+
+The layer above contains classes for preprocessing camera images and LiDAR data. To process the LiDAR data, we first determined and stored the car’s own dimensions in terms of LiDAR distances. This allows us to calculate, based on the current measurement data for each angle, how far away from the car—not just from the LiDAR—an object (such as a wall or obstacle) is located. The preprocessing determines the shortest distance from the car and the corresponding angle for each of three zones (260 to 359 degrees, 350 to 10 degrees, 0 to 100 degrees). This data is later combined with camera or gyro data for steering decisions. From the BGR camera image, we filter out the black walls and use the maximum height to determine whether there is a risk of collision on the right or left. From the HSV image, we filter out the lines, obstacles, and the parking barrier. We then treat the parking barrier as a wall and calculate whether there is a risk of collision on the right or left. In each case, we use only the line color that matches the direction of travel. The direction of travel is determined at the start of the parking maneuver by which side of the magenta wall in front of the camera the exit is visible. We keep track of how many lines (of the correct color) we have already driven over and calculate the new straight-ahead gyro course at each line.
+
+Steering Decision
+
+While Driving in Circles The Roadrunner then calculates its next steering decision based on the preprocessed data. 
+
+Priority 1: Avoid the parking space If the magenta-colored parking space appears too high or too close in the camera image, the car avoids it with a brief steering maneuver. 
+
+Priority 2: Avoiding Walls If a wall is too high or too close, the car avoids it with a short steering movement away from the wall.
+
+Priority 3: Avoiding Obstacles If an obstacle is in the image, our car steers so that the obstacle moves all the way to the left (red) or all the way to the right (green) in the image. This year, we’ve also introduced a graduated evasion strategy. Depending on how close we already are to the obstacle, we steer toward a different position—the target column of the obstacle’s center in the image—and thus gradually move the obstacle sideways out of the frame. Formula: steering angle = servo center + steering factor * (actual column in the image - target column) However, the camera loses sight of the obstacle before we have passed it by far enough. In the example shown in the diagram, our car would, without further action, attempt to steer past the green obstacle on the left and thereby drive around the red obstacle. 
+
+Solution: Combining camera data with LiDAR data. The LiDAR function “shortest distance between 260 degrees and 359 degrees” or between 0 and 100 degrees continues to detect that there is still an obstacle directly to the left of the car. We have defined a “safety zone” with a 12-centimeter radius around the outline of our car. Before our car steers left or right to avoid an obstacle, it first uses LiDAR to check whether there is still something within the safety zone in the desired steering direction. If so, the car continues straight ahead for the time being. If the safety zone is clear, it swerves to avoid the obstacle.
+
+Priority 4: Steer to gyro straight-ahead course. The current straight-ahead course is stored in the StateModule. When steering using the gyro to maintain a straight-ahead course, the same problem can occur as when steering around obstacles. Example: If the car crosses a blue line, the straight-ahead course changes by 90 degrees to the left. However, if there is a red obstacle directly in front, the car must first pass it before it is allowed to turn left. Here, too, the car may lose sight of the obstacle in the camera image before it has passed far enough past it. To prevent the car from hitting the obstacle while turning, the straight-ahead course control system also checks whether anything appears in the LiDAR safety zone (12 cm around the front of the car) in the direction the car is supposed to turn.
+
+Main Program
+
+We use the same program for the opening race and the obstacle race. In the obstacle race, we always start from the parking box. After pressing the start button, we first check whether the magenta-colored parking box is visible in the image. If so, the program enters “Obstacle” mode; otherwise, it enters “Open” mode. In “Obstacle” mode, a separate “Exit Parking” module runs first before the normal loop for driving the laps is executed. After completing the laps, the car performs the parking maneuver while still in Obstacle mode. When parking, the car drives past the parking box, turns toward the outer wall, makes a U-turn, and then drives close to the parking box until the LiDAR detects the front wall of the parking box next to the car. It then turns toward the inner wall and parks in reverse. As it does so, it steers so that the black rear wall appears exactly in the middle between the two magenta side walls in the camera image. 
+
 
 
 # Debugging & Testing 
 
+To identify driving errors, crashes, and similar issues, it is important to be able to observe the car while driving and record data at the same time. We have developed several mechanisms for this purpose.
+
+LEDs 
+
+The four RGB LEDs on the back of the car are used, first, to indicate the startup status and when the car is ready for the start button. In addition, while driving, they provide visual feedback when a line has been detected or when an obstacle of a specific color has been detected on a specific side. They also indicate a “too close” alert, which is calculated from the LiDAR data. This makes it easy to observe while driving whether the car is evaluating key measurement data as expected and responding accordingly.
+
+Logging
+
+ While driving, we write a log file that records measurement data and steering decisions. In addition to the actual log message, each line contains a precise timestamp. We use try-catch blocks to handle crashes in our software and record their cause in the log file. Python is an interpreted language, so even typos and similar errors that the parser doesn’t immediately detect can cause crashes while driving.
+
+LiDAR Logger 
+
+To record LiDAR measurement data, we have created an additional LiDAR logger process. It also hooks into the start signal and the shared-memory array containing the distance measurements. Ten times per second, it writes the entire array as a comma-separated line to a CSV file. Since this begins exactly at the start signal, the data can later be analyzed using tools like Matplotlib and assigned to specific driving situations.
+
+Camera Video
+
+ We also have the option of recording the camera frames as a video in real time. In this case, we overlay the detected obstacles and lines as colored markers so that it is clear whether the car has interpreted the image correctly.
+
+Test 
+
+During testing, we first ran multiple tests using random combinations of obstacles. For some combinations, we identified an increased risk of driving errors. Using the tools described above, we then determined the specific cause of each driving error and, where necessary, added additional log messages. Once we found a solution, we tested it at least 5–10 times with that combination and other obstacle combinations that, in theory, should cause the same problem. This ensured that the solution was truly effective and had no adverse side effects. We also used this method to optimize parameter settings such as the size of the LiDAR safety zone or the gradations in the steering angle formula.
 
 
 
 # Overall System & Engineering Decisions
 
+Technical Specifications
+
+ Length: 18.8 cm, Width: 13.5 cm, Height: 9.5 cm (without Roadrunner pilot) 16.5 cm with Roadrunner pilot Weight: 572 g, Speed: max. approx. 1 m/s
+
 ## Development Goals
+
+We analyzed the issues that our previous car model still has and how they could be resolved. 
+
+Our guiding principle is: accuracy over speed.
+
+The camera loses sight of an obstacle well before the car has completely passed it. If the car then detects another obstacle and steers toward the first obstacle to avoid the second one, it may knock the obstacle over. So far, we’ve been estimating when the car has actually passed the obstacle. However, this is rather imprecise and works better or worse depending on the driving angle. When parking, we tried using IR sensors to measure the distances within the parking space. However, this didn’t work well because the IR sensors were too unreliable. A LiDAR system capable of 360-degree all-around measurement seems like a sensible solution to both problems. Problem: To achieve this, the entire car—including the LiDAR—must be built to be less than 10 cm thick, which is a challenge. Overall, a smaller car has more space on the playing field, which is why we reduced both the length and width in previous versions. This year, we’ve also significantly reduced the height to well under 10 cm (excluding the Roadrunner pilot :-)) and lowered the weight. The image below shows the evolution of the Roadrunner versions toward an increasingly compact car.
 
 ## Design Trade-Offs
 
@@ -411,7 +511,9 @@ If a cable comes loose, this graphic helps to put it back in place easily.
 
 # Appendices
 
-## Hardware Bill of Materials
+## Hardware Bill of Materials 
+
+The complete Bill of Materials is found in the Building Instructions
 
 ## Software Modules
 
@@ -423,6 +525,8 @@ If a cable comes loose, this graphic helps to put it back in place easily.
 - GitHub: nannigalaxy/ldrobot_lidar
 
 ## Resources
+
+
 
 
 
