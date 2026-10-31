@@ -33,7 +33,7 @@ class CameraModules:
         self.bgr_line = None
 
         self.line_height = 60
-        self.top_cut = 10  # 27 ohne über Bande sehen
+        self.top_cut = 8  # 10normal, 27ohne über Bande sehen
 
         self.ignore_top_pixels = 15   # REGELBAR
 
