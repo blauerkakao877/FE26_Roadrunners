@@ -342,29 +342,109 @@ Detailed building instructions for the resulting chassis and the bill of materia
 
 ## Sensors
 
-Our analysis of the weaknesses in our previous car model led us to develop a revised sensor design. We continue to use a gyro (IMU) sensor to determine our orientation on the field. Using one front and one rear camera, we detect lines, obstacles, and walls in the camera’s field of view along the direction of travel. In the immediate vicinity in front of and beside the car, we’ve added a LiDAR sensor to detect objects near the car that the camera cannot (or can no longer) see.
+Our analysis of the weaknesses in our previous car model led us to develop a revised sensor concept. We continue to use a gyro (IMU) sensor to determine our orientation on the field. Using one front and one rear camera, we detect lines, obstacles, and walls in the camera’s field of view along the direction of travel. In the immediate vicinity in front of and beside the car, we’ve added a LiDAR sensor to detect objects near the car that the camera cannot (or can no longer) see.
+
+In the previous version of our car, we had an ultrasonic sensor in the front and infrared sensors on the sides. The ultrasonic sensor measured distances in front of the car, while the infrared sensors could only trigger an alarm if something came too close. Our next try were 5 ToFSensors placed on the car's sides. This was already better, but not good enough. The ToFs have a very small field of view, so we had big gaps in our distance measurements. Additionally, the ToFs required the use of an I2C Multiplexer as they all had the same hardcoded I2C address.
+
+ This year, we use a LiDAR to solve the problem to detect obstacles and walls outside the camera's field of view.
+
+|                 | Pros                                                  | Cons                                                         |
+| --------------- | ----------------------------------------------------- | ------------------------------------------------------------ |
+| **IR Sensors**  | cheap, easy analog signal processing                  | only fixed distance, poor reliability, extremly unreliable with shiny surfaces |
+| **ToF Sensors** | very fast, exact measurements                         | become unreliable with longer cables, small FoV              |
+| **LiDAR**       | measurements in 1 degree resolution in all directions | 100 msec time between 2 measurements in the same direction   |
+
+
 
 ### LiDAR
 
-In the previous version of our car, we had an ultrasonic sensor in the front and infrared sensors on the sides. The ultrasonic sensor measured distances in front of the car, while the infrared sensors could only trigger an alarm if something came too close. In the current version, we have replaced them with a LiDAR STL-19P sensor. 
-
 The LiDAR can accurately measure distances in all directions, but it only updates 10 times per second in the same direction. The ultrasonic sensor was only accurate up to about 1 meter, and even then only if the sensor wasn't angled toward the obstacle or wall. The infrared sensors were quite inaccurate and useless on shiny surfaces.
+
+We compared LiDAR models to select a fitting one.
+
+Requirements: 
+
+- housing as small as possible
+- short minimum distance
+- high sampling frequency
+- python programmable  interface
+
+
+
+| Parameter          | STP-19L     | RPLiDAR A1  |
+| ------------------ | ----------- | ----------- |
+| Measuring Range    | 3cm - 12m   | 15cm - 12m  |
+| Accuracy           | +/- 10mm    | +/-  45 mm  |
+| Scanning frequency | 10 Hz       | 5.5 Hz      |
+| Size               | 39x39x34 mm | 97x70x55 mm |
+| Weight             | 47 g        | 170 g       |
+|                    |             |             |
+
+We chose the STP-19L, especially because it has a very short minimum distance and high accuracy. This allows it to be used within the parking box.
+
+<img src="./v-photos/lidar.png" width="30%">
 
 To be able to use the LiDAR while reversing, it must have a 360-degree field of view. This means it must be able to see over all other car components, but it must be mounted significantly lower than 10 cm in order to still detect obstacles and walls. The manufacturer specifies a maximum deviation of 0.2 degrees up or down for the laser. To ensure that the LiDAR does not look beyond the 10 cm mark too early in the more important forward direction due to this inaccuracy, we have tilted it very slightly forward using a thin plastic washer. We have at least one meter of accurate measurement to the front, and to the rear we still have at least 30 cm of measurement range, which is sufficient for our purposes. For each scan, we normalize each of the 360 supplied angle values to a whole number so that we have fixed angular positions.
 
+| LiDAR Laser Position                                | Measurement of Tilt Angle                         |
+| --------------------------------------------------- | ------------------------------------------------- |
+| <img src="./v-photos/lidar_hoehe2.png" width="300"> | <img src="./v-photos/LiDAR_Tilt.jpg" width="300"> |
+
+
 ### Cameras
 
-To detect obstacles, lines, and walls, you’ll also need a camera. To ensure the Raspberry Pi can see as much of the playing field as possible, we chose two wide-angle cameras: the Raspberry Pi V3 Wide 5K camera. We mounted the front camera at a slight angle, directly below the LiDAR sensor. We use these cameras during normal driving to detect obstacles, lines, and walls. The slight tilt ensures that, despite the low position, there are very few non-playing-field areas in the image that we need to crop out. We use the rear camera when parking to look behind us. We use a reduced image resolution of 320x240 pixels so that we can process the images quickly enough. This allows us to capture approximately 25 images per second. The camera theoretically has a field of view of 120 degrees. Due to the camera’s position and the field of view, we’ve measured that we can actually only use an angle of 85 degrees. A higher camera position would actually be better, but then the LiDAR wouldn’t be able to see over the camera, so we had to make a compromise. To ensure accurate color recognition, we increased the brightness and color contrast in the camera settings. To adjust the thresholds for filtering out a color based on local lighting conditions, we wrote a calibration program that writes the thresholds for all colors to a configuration file, which the car reads upon startup.
+To detect obstacles, lines, and walls, you’ll also need a camera. To ensure the Raspberry Pi can see as much of the playing field as possible, we use two wide-angle cameras, front and rear.
+
+Camera selection:
+
+We tested the RPI V3 Wide and Waveshare 160 degree camera.
+
+| Feature                | RPI V3 Wide | Waveshare 160 |
+| ---------------------- | ----------- | ------------- |
+|                        | <img src="./v-photos/RPI_Cam_V3.png"> | <img src="./v-photos/waveshare.png"> |
+| nominal FoV (diagonal) | 120         | 160           |
+| Sensor                 | Sony IMX708 | Sony IMX219   |
+| max. Resolution        | 4608 × 2592 | 3280 × 2464   |
+|                        |             |               |
+
+Resolution is not a criterion as we use a very reduced image resolution to speed up image processing.
+
+The image of the 160 degree camera was too heavily distorted to use it in our image processing algorithms without running an undistort processing first. This costs too much processing time.
+
+Therefore, we selected the Raspberry Pi V3 Wide camera.
+
+We mounted the front camera at a slight angle, directly below the LiDAR sensor. We use these cameras during normal driving to detect obstacles, lines, and walls. The slight tilt ensures that, despite the low position, there are very few non-playing-field areas in the image that we need to crop out. We use the rear camera when parking to look behind us. We use a reduced image resolution of 320x240 pixels so that we can process the images quickly enough. This allows us to capture approximately 25 images per second. The camera theoretically has a field of view of 120 degrees. Due to the camera’s position and the field of view, we’ve measured that we can actually only use an angle of 85 degrees. A higher camera position would actually be better, but then the LiDAR wouldn’t be able to see over the camera, so we had to make a compromise. 
+
+**Camera Calibration**
+
+To ensure accurate color recognition, we increased the brightness and color contrast in the camera settings. To adjust the thresholds for filtering out a color based on local lighting conditions, we wrote a calibration program that writes the thresholds for all colors to a configuration file, which the car reads upon startup.
+
+
 
 ### Gyro
 
-To determine the car’s current orientation on the field and its cumulative total rotation, we use an IMU sensor (gyro + accelerometer), the Adafruit BNO085 sensor. This sensor is mounted horizontally at the front, aligned with the car’s longitudinal axis. The sensor has a special operating mode called Game Rotation Vector, which allows it to continuously calculate the orientation relative to the starting position. When the gyro starts up, it automatically calibrates itself so that the current orientation is set as the zero orientation. The BNO085 also has a built-in chip that automatically combines the gyroscope and accelerometer data so that we can read the corrected angles directly. A common problem is gyro drift. This occurs when the measured angle does not return exactly to its initial value after a rotational movement, causing the measurement error to accumulate with each lap driven. With the BNO085, the drift is very low due to the combination with the accelerometer, but it is still noticeable. According to the manufacturer’s datasheet, it amounts to approximately 1.5 degrees per full 360-degree rotation. Since this drift is fairly constant, we compensate for it by adding an offset every 90 degrees.
+<img src="./v-photos/gyro.jpg">
+
+To determine the car’s current orientation on thefield and its cumulative total rotation, we use an IMU sensor (gyro + accelerometer), the Adafruit BNO085 sensor. This sensor is mounted horizontally at the front, aligned with the car’s longitudinal axis. The sensor has a special operating mode called Game Rotation Vector, which allows it to continuously calculate the orientation relative to the starting position. When the gyro starts up, it automatically calibrates itself so that the current orientation is set as the zero orientation. The BNO085 also has a built-in chip that automatically combines the gyroscope and accelerometer data so that we can read the corrected angles directly. 
+
+A common problem is gyro drift. This occurs when the measured angle does not return exactly to its initial value after a rotational movement, causing the measurement error to accumulate with each lap driven. With the BNO085, the drift is very low due to the combination with the accelerometer, but it is still noticeable. According to the manufacturer’s datasheet, it amounts to approximately 1.5 degrees per full 360-degree rotation. Since this drift is fairly constant, we compensate for it by adding an offset every 90 degrees.
+
+
 
 ## Power Management
 
 For our new design, we wanted to significantly reduce both the weight and the height. For this reason, we looked for a motor and servo controller with a built-in 5V step-down converter that could also power the Pi. And we wanted to use the smallest possible battery. This required us to perform precise measurements and calculations to ensure that the chosen power source would actually be sufficient to safely power the car through an entire race. Previously, we had used relatively generously sized batteries and hardly ever questioned their capacity. Now, however, we are forced to plan and calculate much more precisely.
 
+First estimation of power consumption (maximum values):
 
+|                                        | Voltage | Current | Power  |
+| -------------------------------------- | ------- | ------- | ------ |
+| Raspberry Pi (incl. Cameras and LiDAR) | 5V      | 5A      | 25W    |
+| Servo                                  | 5V      | 0.5A    | 2.5W   |
+| RGB LEDs (4x max. 60 mA)               | 5V      | 0.24A   | 1.2W   |
+| Sum at Seengreat 5V Step-Down          |         | 5.74A :exclamation:  | 28.74W :exclamation:|
+| Motor                                  | 10V     | 0.5A    | 5W     |
+|                                        |         |         |        |
 
 According to tests on Philohome (see sources), the drive motor consumes approximately 500 mA (~5 W) at 10 V under load. 
 
@@ -380,19 +460,38 @@ Seengreat Motor Controller 5V/3A Step-Step-Down:
 
    Two processes are running on the Pi: one reads and processes camera images as quickly as possible, while the other reads and decodes LiDAR measurement data as quickly as possible.
 
+<img src="./v-photos/Strommessung_Pi_Last.jpeg" width="70%">
+
+|                                        | Voltage | Current | Power  |
+| -------------------------------------- | ------- | ------- | ------ |
+| Raspberry Pi (incl. Cameras and LiDAR) | 5.13V   | 1.46A   | 7.5W   |
+| Servo                                  | 5V      | 0.5A    | 2.5W   |
+| RGB LEDs (4x max. 60 mA)               | 5V      | 0.24A   | 1.2W   |
+| Sum at Seengreat 5V Step-Down          |         | 2.2A :heavy_check_mark: | 11.2W :heavy_check_mark:|
+| Motor                                  | 10V     | 0.5A    | 5W     |
+| Total |         |         | 16.2W :heavy_check_mark:|
+
+The motor controller can handle up to 15 W → fits 16.2 W total power consumption of the car: 16.2 W, max. 20 W is possible (5 W motor + 15 W on the motor controller) 
 
 
-The motor controller can handle up to 15 W → fits 16.2 W total power consumption of the car: 16.2 W, max. 20 W is possible (5 W motor + 15 W on the motor controller) For the battery, we’re using the Red Power XT with a capacity of 1,100 mAh and a voltage of 7.4 V (= 8.1 Wh), which is small enough but still provides sufficient runtime.
 
+### Power Supply
+
+For the battery, we’re using the Red Power XT with a capacity of 1,100 mAh and a voltage of 7.4 V (= 8.1 Wh), which is small enough but still provides sufficient runtime.
+
+|      | Length | Width | Height |
+| ---- | ------ | ----- | ------ |
+| <img src="./v-photos/battery.png" width="131"> | 55 mm  | 30 mm | 17 mm  |
+|      |        |       |        |
 
 
 Purely mathematically speaking, the battery runs out after about 20 minutes at maximum load. That's more than enough to complete a race without running out of power.
 
+### Power Distribution
+
 This results in the following block diagram of the power supply in our car:
 
-### Power Supply
-
-### Power Distribution
+<img src="./schemes/power_supply_diagram.png">
 
 ### Wiring Diagram
 
