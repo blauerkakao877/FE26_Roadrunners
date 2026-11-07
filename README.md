@@ -589,6 +589,10 @@ Our guiding principle is: accuracy over speed.
 
 The camera loses sight of an obstacle well before the car has completely passed it. If the car then detects another obstacle and steers toward the first obstacle to avoid the second one, it may knock the obstacle over. So far, we’ve been estimating when the car has actually passed the obstacle. However, this is rather imprecise and works better or worse depending on the driving angle. When parking, we tried using IR sensors to measure the distances within the parking space. However, this didn’t work well because the IR sensors were too unreliable. A LiDAR system capable of 360-degree all-around measurement seems like a sensible solution to both problems. Problem: To achieve this, the entire car—including the LiDAR—must be built to be less than 10 cm thick, which is a challenge. Overall, a smaller car has more space on the playing field, which is why we reduced both the length and width in previous versions. This year, we’ve also significantly reduced the height to well under 10 cm (excluding the Roadrunner pilot :-)) and lowered the weight. The image below shows the evolution of the Roadrunner versions toward an increasingly compact car.
 
+<img src="./v-photos/Roadrunner_Versionen2.png">
+
+<img src="./v-photos/Hindernis-Problem.png">
+
 ## Design Trade-Offs
 
 - LiDAR vs ToF Sensors
@@ -625,7 +629,15 @@ The complete Bill of Materials is found in the Building Instructions
 
 ## Resources
 
-
+- https://opencv.org/university
+- https://raspberrypi.org
+- https://learn.adafruit.org
+- https://de.wikipedia.org/wiki/Lenkung
+- https://www.pololu.com/category/132/step-up-boost-voltage-regulators
+- https://www.philohome.com/motors/motorcomp.htm
+- https://seengreat.com/wiki/91/motor-and-servo-driver-hat
+- https://www.dfrobot.com/product-2610.html?srsltid=AfmBOoqMNmt9gb94ojALtN5lyfTdSwRYLyC960HKojKgugtddbB86Ww3
+- https://www.wirelog.net/posts/2024-12-21Idrobot-lidar-parser/
 
 
 
