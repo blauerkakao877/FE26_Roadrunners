@@ -59,7 +59,7 @@ class State:
         self.hindernis = False
         self.hindernis_sperre = False
         self.h_zeit = 0.0
-        self.h_warten = 0.45
+        self.h_warten = 0.15 #0.2
         self.kh = 0.4 #0.3
         self.letzte_farbe = "N"
         self.h_avoid_until = 0.0

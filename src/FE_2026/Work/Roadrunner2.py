@@ -452,17 +452,20 @@ class Roadrunner:
         offset = self.state.k * (self.state.geradeaus - self.state.gesamt)
         offset = max(-30, min(30, offset))
         
-        if (offset < 0) and (self.state.LDL < 130 ) and (self.state.LDL > 0 ):
-            #offset = 0
-            offset = 5
+        links_zu = 0 < self.state.LDL < 130
+        rechts_zu = 0 < self.state.LDR < 130
+        
+        # elif: sonst ueberschreibt die Rechts-Sperre die Links-Sperre; beide zu -> geradeaus
+        if (offset < 0) and links_zu:
+            offset = 0 if rechts_zu else 5
+            self.state.Lidarsperre_L = True
             self.L.on(2, PINK)
             self.pink_last = time.time()
             self.WL.write_Log("Lidar verhindert lenken nach links/geradeaus")
             
-            
-        if (offset > 0) and (self.state.LDR < 130) and (self.state.LDR > 0):
-            #offset = 0
-            offset = -5
+        elif (offset > 0) and rechts_zu:
+            offset = 0 if links_zu else -5
+            self.state.Lidarsperre_R = True
             self.L.on(2, PINK)
             self.pink_last = time.time()
             self.WL.write_Log("Lidar verhindert lenken nach rechts/geradeaus")
@@ -505,10 +508,6 @@ class Roadrunner:
         _, self.state.LDR = self.LD.getMin_Dist_Bereich_RR(0, 100) #90
         _, self.state.LDL = self.LD.getMin_Dist_Bereich_RR(260, 0) #270
         _, self.state.LDV = self.LD.getMin_Dist_Bereich_RR(353, 7)
-        
-        self.state.Lidarsperre_L = False
-        self.state.Lidarsperre_V = False
-        self.state.Lidarsperre_R = False
             
     # -------------------- PARKEN -------------------- 
     def einparken_l(self):
@@ -654,7 +653,8 @@ class Roadrunner:
         self.L.all_off()
         self.D.gerade()
         time.sleep(0.1)
-        self.D.ruck(0.15)
+        self.D.ruck(0.2)   # wie einparken_r (vorher 0.15 -> kam nicht weit genug rein)
+        time.sleep(0.5)    # wie einparken_r: erst gerade ein Stück rein, dann Magenta-Lenkung
         #alarm_HL, alarm_VL, alarm_HR, alarm_VR, alarm_HM = P.prox_alarm()
         weiterfahren = time.time() + 5.0
         while (time.time() < weiterfahren):
@@ -1082,6 +1082,9 @@ class Roadrunner:
         self.state.back_cam = False
 
         self.pink_last = 0
+        self.state.Lidarsperre_L = False
+        self.state.Lidarsperre_V = False
+        self.state.Lidarsperre_R = False
         
         presets = {
             "slow": {
@@ -1099,10 +1102,10 @@ class Roadrunner:
                 "linie_zaehlen_RG": 0.45,
                 "linie_zaehlen_RR": 0.45,
                 
-                "stop_time_LG": 3.0,
-                "stop_time_LR": 4.0,
-                "stop_time_RG": 4.0,
-                "stop_time_RR": 3.0,
+                "stop_time_LG": 2.0,
+                "stop_time_LR": 3.0,
+                "stop_time_RG": 3.0,
+                "stop_time_RR": 2.0,
             },
             
             "medium": {
@@ -1329,9 +1332,9 @@ class Roadrunner:
             if self.state.Lidarsperre_L:
                 cv2.line(
                     record_img,
-                    (record_img.shape[1]-200, 0),
-                    (record_img.shape[1]-200, record_img.shape[0]),
-                    (255, 255, 0),
+                    (40, 0),
+                    (40, record_img.shape[0]),
+                    (0, 255, 255),
                     4
                 )
             if self.state.Lidarsperre_V:
@@ -1339,20 +1342,24 @@ class Roadrunner:
                     record_img,
                     (record_img.shape[1]-159, 0),
                     (record_img.shape[1]-159, record_img.shape[0]),
-                    (255, 255, 0),
+                    (0, 255, 255),
                     4
                 )
             if self.state.Lidarsperre_R:
                 cv2.line(
                     record_img,
-                    (record_img.shape[1]-120, 0),
-                    (record_img.shape[1]-120, record_img.shape[0]),
-                    (255, 255, 0),
+                    (record_img.shape[1]-40, 0),
+                    (record_img.shape[1]-40, record_img.shape[0]),
+                    (0, 255, 255),
                     4
                 )
 
             # ---- Frame speichern ----
             self.C.write_frame(record_img)
+            # erst nach dem Zeichnen zuruecksetzen, sonst sieht man die Sperre nie
+            self.state.Lidarsperre_L = False
+            self.state.Lidarsperre_V = False
+            self.state.Lidarsperre_R = False
 
             self.linien_suchen_obstacle(self.hsv_line)
 
@@ -1455,7 +1462,7 @@ class Roadrunner:
                     print("abstand rot: ", abstand)
                     print("steerinpoint rot: ", steeringpoint)
 
-                    if lenkwinkel > 96 and self.state.LDR < 130:
+                    if lenkwinkel > 96 and 0 < self.state.LDR < 130:
                         #lenkwinkel = 96
                         lenkwinkel = 91
                         self.L.on(2, PINK)
@@ -1464,7 +1471,7 @@ class Roadrunner:
                         self.WL.write_Log("Lidar verhindert lenken nach rechts/Hindernis rot")
                         
                     #self.WL.write_Log("lenkwinkel rot: " + str(lenkwinkel))
-                    if self.state.gesamt < self.state.geradeaus + 80:
+                    if self.state.gesamt < self.state.geradeaus + 60:
                         self.D.servo_angle(lenkwinkel)
                         #self.WL.write_Log("lenkwinkel rot: " + str(lenkwinkel))
                     #else:
@@ -1514,7 +1521,7 @@ class Roadrunner:
                     print("abstand grun: ", abstand)
                     print("steerinpoint grun: ", steeringpoint)
                     
-                    if lenkwinkel < 96 and self.state.LDL < 130:
+                    if lenkwinkel < 96 and 0 < self.state.LDL < 130:
                         #lenkwinkel = 96
                         lenkwinkel = 101
                         self.L.on(2, PINK)
@@ -1522,7 +1529,7 @@ class Roadrunner:
                         self.state.Lidarsperre_L = True
                         self.WL.write_Log("Lidar verhindert lenken nach links/Hindernis grun")
                     
-                    if self.state.gesamt > self.state.geradeaus - 80:
+                    if self.state.gesamt > self.state.geradeaus - 60:
                         self.D.servo_angle(lenkwinkel)
                         #self.WL.write_Log("lenkwinkel gruen: " + str(lenkwinkel))
                     #else:
