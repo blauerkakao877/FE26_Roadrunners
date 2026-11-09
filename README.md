@@ -462,6 +462,10 @@ Seengreat Motor Controller 5V/3A Step-Step-Down:
 
 <img src="./v-photos/Strommessung_Pi_Last.jpeg" width="70%">
 
+To get a realistic measurement of the current consumed by the driving motor, we mounted a power meter on a lego plate and attached it to the motor power supply so we can see the measurements while driving.
+
+<img src="./v-photos/Measure_motor_power.png" width="50%">
+
 |                                        | Voltage | Current | Power  |
 | -------------------------------------- | ------- | ------- | ------ |
 | Raspberry Pi (incl. Cameras and LiDAR) | 5.13V   | 1.46A   | 7.5W   |
@@ -515,63 +519,188 @@ If a cable comes loose, this graphic helps to put it back in place easily.
 
 # Software Architecture & Obstacle Strategy 
 
-Code Development
+## Architecture Overview
 
- We developed our code in Python on a Raspberry Pi 5. To interface with the sensors and the motor driver board, we used the corresponding CircuitPython libraries from Adafruit. For image processing, we use the OpenCV library. We developed our functions for reading LiDAR data based on the GitHub project nannigalaxy/ldrobot_lidar. The LiDAR sensor generates high data rates that must be quickly retrieved and processed to ensure we always have up-to-date distance data in all directions. At the same time, the camera images must be read and analyzed quickly enough. The Raspberry Pi 5 has 4 processor cores and thus sufficient computing power. However, due to Python’s architecture, all threads of a Python script always run on the same core. To truly run both tasks in parallel and utilize two cores for this purpose, we have split our software into two processes. The `lidar_reader` process, which processes the LiDAR measurement values, makes these available to the `roadrunner2` main process via shared memory. Since Rule 6.14 prohibits the processing of any measurement values before the start button has been pressed, we have created a second shared memory to provide a start signal to downstream processes. 
+ We developed our code in Python on a Raspberry Pi 5. To interface with the sensors and the motor driver board, we used the corresponding CircuitPython libraries from Adafruit. For image processing, we use the OpenCV library. We developed our functions for reading LiDAR data based on the GitHub project nannigalaxy/ldrobot_lidar. 
 
-Flowchart:
+We use GitHub for source code management.
+
+Our main strategy for navigating the obstacle challenge is "Scan while driving". While driving, our car continuously scans the parcours, extract the relevant objects and their positions from the camera image, fuses this information with distance data from the LiDAR and orientation data from the Gyro. From this information, it calculates its next steering decision. 
 
 
 
-Software Modules: Base Classes At the lowest level are base classes that encapsulate the respective hardware components. We have combined the motor and servo into a *DrivingBase* class, which provides all motion functions. LiDAR, the gyro, the camera, and the LEDs are each separate classes. The gyro class not only provides the current orientation on the playing field but also the cumulative total rotation since startup. The camera function already provides a BGR (Blue-Green-Red) image and an HSV (Hue-Saturation-Value) image to make it easier to filter colors. We manage the car’s current state and all the information needed for the next steering decision in a RoadrunnerState class. We use GitHub for source code management.
+### Software Modules
 
-Preprocessing:
+ Base Classes At the lowest level are base classes that encapsulate the respective hardware components. We have combined the motor and servo into a *DrivingBase* class, which provides all motion functions. LiDAR, the gyro, the camera, and the LEDs are each separate classes. The gyro class not only provides the current orientation on the playing field but also the cumulative total rotation since startup. The camera function already provides a BGR (Blue-Green-Red) image and an HSV (Hue-Saturation-Value) image to make it easier to filter colors. We manage the car’s current state and all the information needed for the next steering decision in a RoadrunnerState class. 
 
-The layer above contains classes for preprocessing camera images and LiDAR data. To process the LiDAR data, we first determined and stored the car’s own dimensions in terms of LiDAR distances. This allows us to calculate, based on the current measurement data for each angle, how far away from the car—not just from the LiDAR—an object (such as a wall or obstacle) is located. The preprocessing determines the shortest distance from the car and the corresponding angle for each of three zones (260 to 359 degrees, 350 to 10 degrees, 0 to 100 degrees). This data is later combined with camera or gyro data for steering decisions. From the BGR camera image, we filter out the black walls and use the maximum height to determine whether there is a risk of collision on the right or left. From the HSV image, we filter out the lines, obstacles, and the parking barrier. We then treat the parking barrier as a wall and calculate whether there is a risk of collision on the right or left. In each case, we use only the line color that matches the direction of travel. The direction of travel is determined at the start, when leaving the parking box: the LiDAR detects on which side of the car the parking box wall is, so the exit is on the opposite side. We keep track of how many lines (of the correct color) we have already driven over and calculate the new straight-ahead gyro course at each line.
 
-Steering Decision
 
-While Driving in Circles The Roadrunner then calculates its next steering decision based on the preprocessed data. 
+The LiDAR sensor generates high data rates that must be quickly retrieved and processed to ensure we always have up-to-date distance data in all directions. At the same time, the camera images must be read and analyzed quickly enough. The Raspberry Pi 5 has 4 processor cores and thus sufficient computing power. However, due to Python’s architecture, all threads of a Python script always run on the same core. To truly run both tasks in parallel and utilize two cores for this purpose, we have split our software into two processes. The `lidar_reader` process, which processes the LiDAR measurement values, makes these available to the `roadrunner2` main process via shared memory. Since Rule 6.14 prohibits the processing of any measurement values before the start button has been pressed, we have created a second shared memory to provide a start signal to downstream processes. 
 
-Priority 1: Avoid the parking space If the magenta-colored parking space appears too high or too close in the camera image, the car avoids it with a brief steering maneuver. 
 
-Priority 2: Avoiding Walls If a wall is too high or too close, the car avoids it with a short steering movement away from the wall.
 
-Priority 3: Avoiding Obstacles If an obstacle is in the image, our car steers so that the obstacle moves all the way to the left (red) or all the way to the right (green) in the image. This year, we’ve also introduced a graduated evasion strategy. Depending on how close we already are to the obstacle, we steer toward a different position—the target column of the obstacle’s center in the image—and thus gradually move the obstacle sideways out of the frame. Formula: steering angle = servo center + steering factor * (actual column in the image - target column) However, the camera loses sight of the obstacle before we have passed it by far enough. In the example shown in the diagram, our car would, without further action, attempt to steer past the green obstacle on the left and thereby drive around the red obstacle. 
+ARCHITECTURE GRAPHIC
+
+
+
+| Module                 | Purpose |
+| ---------------------- | ------- |
+| Cam.py                 |         |
+| Cam_moduls_contours.py |         |
+| Cam_trackbars.py       |         |
+| Color_Defs.py          |         |
+| DrivingBase.py         |         |
+| Gyro.py                |         |
+| Led.py                 |         |
+| lidar_data.py          |         |
+| lidar_logger.py        |         |
+| lidar_reader.py        |         |
+| Roadrunner_state.py    |         |
+| Roadrunner2.py         |         |
+| Write_Logfile.py       |         |
+
+
+
+### Sensor Data Preprocessing
+
+The level on top of the basic sensor classes contains classes for preprocessing camera images and LiDAR data. 
+
+#### LiDAR Data
+
+To process the LiDAR data, we first determined and stored the car’s own dimensions in terms of LiDAR distances. 
+
+To do so, we wrapped our car in cardboard and recorded the measured distances using the LiDAR Logger. The resulting array of 360 distances in mm is then stored in our software as a property of our car. Now our car known its own dimensions in terms of LiDAR distances in 1-degree resolution.
+
+<img src="./v-photos/own_size.png" width="70%">
+
+This allows us to calculate, based on the current measurement data for each angle, how far away from the car—not just from the LiDAR—an object (such as a wall or obstacle) is located. The preprocessing determines the shortest distance from the car and the corresponding angle for each of three zones (260 to 359 degrees, 350 to 10 degrees, 0 to 100 degrees). This data is later combined with camera or gyro data for steering decisions. 
+
+#### Image Data
+
+**Walls**
+
+From the BGR camera image, we filter out the black walls and use the maximum height to determine whether there is a risk of collision on the right or left. To easily estimate the wall height, we calculate a binary image with walls appearing white and everything else appearing black. We then calculate a histogram for each image half. If the maximum histogram value on a side exceeds a preconfigured threshold, the wall is dangerously near and the preprocessing raises a collision alarm.
+
+In our first version, we used a grayscale image to filter the black walls. However, this was unreliable in some light situations where dark green obstacles or dark blue lines appeard almost black in the grayscale image too. The BGR image is a more reliable choice. To be real black, an area must have low values in all three color channels.
+
+
+
+From the HSV image, we filter out the lines, obstacles, and the parking box using classic OpenCV HSV color filters. 
+
+**Lines**
+
+To detect a line when almost there, our Image processor only searches for blue or orange in a small Region of Interest in the lower middle area of the image. When the driving direction is known, the image processor only filters the corresponding color (orange = CW, blue = CCW) to save processing time.
+
+The driving direction is determined at the start, when leaving the parking box: the LiDAR detects on which side of the car the parking box wall is, so the exit is on the opposite side. We keep track of how many lines (of the correct color) we have already driven over and calculate the new straight-ahead gyro course at each line.
+
+**Obstacles**
+
+The obstacles processing filters the biggest green and biggest red blob and then calculates the biggest overall obstacle and returns its size and position in the image. This obstacle is considered the most relevant one for the next steering decision.
+
+**Parking Box**
+
+We treat the parking box as a wall and calculate whether there is a risk of collision on the right or left using histograms like we did with the walls. 
+
+
+
+### Steering Decision
+
+While driving the Roadrunner calculates its next steering decision based on the preprocessed data. 
+
+**Priority 1:** 
+
+Avoid the parking space If the magenta-colored parking space appears too high or too close in the camera image, the car avoids it with a brief steering maneuver. 
+
+**Priority 2:**
+
+ Avoiding Walls If a wall is too high or too close, the car avoids it with a short steering movement away from the wall.
+
+**Priority 3:** 
+
+Avoiding Obstacles. If an obstacle is in the image, our car steers so that the obstacle moves all the way to the left (red) or all the way to the right (green) in the image. This year, we’ve also introduced a graduated evasion strategy. Depending on how close we already are to the obstacle, we steer toward a different position—the target column of the obstacle’s center in the image—and thus gradually move the obstacle sideways out of the frame. Formula: steering angle = servo center + steering factor * (actual column in the image - target column) However, the camera loses sight of the obstacle before we have passed it by far enough. In the example shown in the diagram, our car would, without further action, attempt to steer past the green obstacle on the left and thereby drive around the red obstacle. 
 
 Solution: Combining camera data with LiDAR data. The LiDAR function “shortest distance between 260 degrees and 359 degrees” or between 0 and 100 degrees continues to detect that there is still an obstacle directly to the left of the car. We have defined a “safety zone” with a 12-centimeter radius around the outline of our car. Before our car steers left or right to avoid an obstacle, it first uses LiDAR to check whether there is still something within the safety zone in the desired steering direction. If so, the car continues straight ahead for the time being. If the safety zone is clear, it swerves to avoid the obstacle.
 
-Priority 4: Steer to gyro straight-ahead course. The current straight-ahead course is stored in the StateModule. When steering using the gyro to maintain a straight-ahead course, the same problem can occur as when steering around obstacles. Example: If the car crosses a blue line, the straight-ahead course changes by 90 degrees to the left. However, if there is a red obstacle directly in front, the car must first pass it before it is allowed to turn left. Here, too, the car may lose sight of the obstacle in the camera image before it has passed far enough past it. To prevent the car from hitting the obstacle while turning, the straight-ahead course control system also checks whether anything appears in the LiDAR safety zone (12 cm around the front of the car) in the direction the car is supposed to turn.
+**Priority 4:**
 
-Main Program
+ Steer to gyro straight-ahead course. The current straight-ahead course is stored in the StateModule. When steering using the gyro to maintain a straight-ahead course, the same problem can occur as when steering around obstacles. Example: If the car crosses a blue line, the straight-ahead course changes by 90 degrees to the left. However, if there is a red obstacle directly in front, the car must first pass it before it is allowed to turn left. Here, too, the car may lose sight of the obstacle in the camera image before it has passed far enough past it. To prevent the car from hitting the obstacle while turning, the straight-ahead course control system also checks whether anything appears in the LiDAR safety zone (12 cm around the front of the car) in the direction the car is supposed to turn.
 
-We use the same program for the opening race and the obstacle race. In the obstacle race, we always start from the parking box. After pressing the start button, we first use the LiDAR to check whether the car is standing in the parking box: if there is a wall less than 20 cm in front of the car and a wall less than 40 cm to the left or right, the program enters “Obstacle” mode; otherwise, it enters “Open” mode. In “Obstacle” mode, a separate “Exit Parking” module runs first before the normal loop for driving the laps is executed. After completing the laps, the car performs the parking maneuver while still in Obstacle mode. When parking, the car drives past the parking box, turns toward the outer wall, makes a U-turn, and then drives close to the parking box until the LiDAR detects the front wall of the parking box next to the car. It then turns toward the inner wall and parks in reverse. As it does so, it steers so that the black rear wall appears exactly in the middle between the two magenta side walls in the camera image. 
+
+
+### Main Program
+
+We use the same program for the opening race and the obstacle race. In the obstacle race, we always start from the parking box. After pressing the start button, we first use the LiDAR to check whether the car is standing in the parking box: if there is a wall less than 20 cm in front of the car and a wall less than 40 cm to the left or right, the program enters “Obstacle” mode; otherwise, it enters “Open” mode. In “Obstacle” mode, a separate “Exit Parking” module runs first before the normal loop for driving the laps is executed. 
+
+**Parking**
+
+After completing the laps, the car performs the parking maneuver while still in Obstacle mode. When parking, the car drives past the parking box, turns toward the outer wall, makes a U-turn, and then drives close to the parking box until the LiDAR detects the front wall of the parking box next to the car. It then turns toward the inner wall and parks in reverse. As it does so, it steers so that the black rear wall appears exactly in the middle between the two magenta side walls in the camera image. When between the magenta walls, it steers towards the rear right corner. It then corrects its orientation until parked parallel.
+
+While doing so, it uses the LiDAR minimum-distance-from-car function to stop before hitting a magenta wall.
+
+
 
 
 
 # Debugging & Testing 
 
-To identify driving errors, crashes, and similar issues, it is important to be able to observe the car while driving and record data at the same time. We have developed several mechanisms for this purpose.
+### Unit Tests
 
-LEDs 
+Our python classes all contain a unit test area so we can test-drive their functionality separately from other modules. The unit tests produce log data, live printed data or live image data showing processing results.
+
+We also use the unit tests of the base sensor and driving base classes to test-drive the corresponding hardware modules on our car.
+
+The unit tests of the image processor show all image processing steps like masks and detected image objects and can be used to investigate problems on the field without actually driving. We can reproduce a problematic situation, connect a monitor to our Pi and run the image processing unit test to see what the problem might be.
+
+### Field Tests
+
+To identify driving errors, crashes, and similar issues live, it is important to be able to observe the car while driving and record data at the same time. We have developed several mechanisms for this purpose.
+
+**LEDs**
+
+Our previous car already had LEDs to signal its internal states, but theses were a lot of normal LEDs which occupied a lot of space and consumed a lot of power.
+As our goal was to build a small and flat chassis, we replaced them by 4 RGB LEDs.
+
+<img src="./v-photos/leds_alt_neu.png">
 
 The four RGB LEDs on the back of the car are used, first, to indicate the startup status and when the car is ready for the start button. In addition, while driving, they provide visual feedback when a line has been detected or when an obstacle of a specific color has been detected on a specific side. They also indicate a “too close” alert, which is calculated from the LiDAR data. This makes it easy to observe while driving whether the car is evaluating key measurement data as expected and responding accordingly.
 
-Logging
+**Logging**
 
  While driving, we write a log file that records measurement data and steering decisions. In addition to the actual log message, each line contains a precise timestamp. We use try-catch blocks to handle crashes in our software and record their cause in the log file. Python is an interpreted language, so even typos and similar errors that the parser doesn’t immediately detect can cause crashes while driving.
 
-LiDAR Logger 
+**LiDAR Logger** 
 
 To record LiDAR measurement data, we have created an additional LiDAR logger process. It also hooks into the start signal and the shared-memory array containing the distance measurements. Ten times per second, it writes the entire array as a comma-separated line to a CSV file. Since this begins exactly at the start signal, the data can later be analyzed using tools like Matplotlib and assigned to specific driving situations.
 
-Camera Video
+**Camera Video**
 
- We also have the option of recording the camera frames as a video in real time. In this case, we overlay the detected obstacles and lines as colored markers so that it is clear whether the car has interpreted the image correctly.
+ We also have the option of recording the camera frames as a video in real time. In each frame, we overlay the detected obstacles and lines as colored markers so that it is clear whether the car has interpreted the image correctly.
 
-Test 
+## Reliability Tests
 
 During testing, we first ran multiple tests using random combinations of obstacles. For some combinations, we identified an increased risk of driving errors. Using the tools described above, we then determined the specific cause of each driving error and, where necessary, added additional log messages. Once we found a solution, we tested it at least 5–10 times with that combination and other obstacle combinations that, in theory, should cause the same problem. This ensured that the solution was truly effective and had no adverse side effects. We also used this method to optimize parameter settings such as the size of the LiDAR safety zone or the gradations in the steering angle formula.
+When a driving error occurs, we can align video, LiDAR Log and text logfile to find out the reason. We can then see whether a strategy does not work out or whether it just needs some tuning.
+
+### Edge Cases
+
+**Color detection**
+Our algorithm relys on good color detection. Colors may vary if, for example, a person stands next to the game pad and casts a shadow.
+To be sure our color calibration delivers reliable results, we explicitly simulate varying light conditions during color calibration. We test our color detection from all angles with and without shadows from walls or persons.
+
+**Obstacle Configurations**
+
+<img src="./v-photos/Edge_case_test1.png" width="70%">
+
+<img src="./v-photos/Edge_case_test2.png" width="70%">
+
+
+
+We found that due to our obstacle strategy "scan and drive", there are combinations of obstacles that are harder for our algorithm to master than others.
+These are combinations at the corners of the game pad where an obstacle moves out of the cameras field of view before it is completly passed, and the driving straight direction is already at + or - 90 degree because a line has been passed.
+Another difficulty is an obstacle forcing the car to the outer lane directly in front of a corner and one forcing it to the inner lane directly behind the corner and vice versa.
+
+
+We tested setups with three or four corners all set to such critical combinations and run at least 10 x 3 rounds to be sure the algorithm is stable enough. When at least 8 out of 10 were ok, it was good enough.
 
 
 
@@ -621,11 +750,18 @@ The complete Bill of Materials is found in the Building Instructions
 ## Software Modules
 
 - Raspbian Bookworm Operating System
+
 - OpenCV image processing
+
 - Adafruit Blinka (Interface to circuitpython/micropython libs for electronic hardware modules)
+
 - Adafruit_CircuitPython_BNO08x
+
 - Adafruit-PCA9685
+
 - GitHub: nannigalaxy/ldrobot_lidar
+
+  
 
 ## Resources
 
