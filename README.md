@@ -556,7 +556,7 @@ The LiDAR sensor generates high data rates that must be quickly retrieved and pr
 | Roadrunner2.py         | main programm, sensor data fusion and steering decision logic |
 | Write_Logfile.py       | helper class to write logfile                                |
 
-<img src="./v-photos/race_flowchart.png">
+<img src="./v-photos/Race_Flowchart.png">
 
 ### Sensor Data Preprocessing
 
