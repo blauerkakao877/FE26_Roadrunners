@@ -521,7 +521,7 @@ If a cable comes loose, this graphic helps to put it back in place easily.
 
 ## Architecture Overview
 
- We developed our code in Python on a Raspberry Pi 5. To interface with the sensors and the motor driver board, we used the corresponding CircuitPython libraries from Adafruit. For image processing, we use the OpenCV library. We developed our functions for reading LiDAR data based on the GitHub project nannigalaxy/ldrobot_lidar. 
+We developed our code in Python on a Raspberry Pi 5. To interface with the sensors and the motor driver board, we used the corresponding CircuitPython libraries from Adafruit. For image processing, we use the OpenCV library. We developed our functions for reading LiDAR data based on the GitHub project nannigalaxy/ldrobot_lidar. 
 
 We use GitHub for source code management.
 
@@ -533,33 +533,30 @@ Our main strategy for navigating the obstacle challenge is "Scan while driving".
 
  Base Classes At the lowest level are base classes that encapsulate the respective hardware components. We have combined the motor and servo into a *DrivingBase* class, which provides all motion functions. LiDAR, the gyro, the camera, and the LEDs are each separate classes. The gyro class not only provides the current orientation on the playing field but also the cumulative total rotation since startup. The camera function already provides a BGR (Blue-Green-Red) image and an HSV (Hue-Saturation-Value) image to make it easier to filter colors. We manage the car’s current state and all the information needed for the next steering decision in a RoadrunnerState class. 
 
-
-
 The LiDAR sensor generates high data rates that must be quickly retrieved and processed to ensure we always have up-to-date distance data in all directions. At the same time, the camera images must be read and analyzed quickly enough. The Raspberry Pi 5 has 4 processor cores and thus sufficient computing power. However, due to Python’s architecture, all threads of a Python script always run on the same core. To truly run both tasks in parallel and utilize two cores for this purpose, we have split our software into two processes. The `lidar_reader` process, which processes the LiDAR measurement values, makes these available to the `roadrunner2` main process via shared memory. Since Rule 6.14 prohibits the processing of any measurement values before the start button has been pressed, we have created a second shared memory to provide a start signal to downstream processes. 
 
+<img src="./v-photos/Software_Architecture01.png">
 
 
-ARCHITECTURE GRAPHIC
 
 
+| Module                 | Purpose                                                      |
+| ---------------------- | ------------------------------------------------------------ |
+| Cam.py                 | basic camera functions, read frames                          |
+| Cam_moduls_contours.py | process image features (lines, walls, obstacles, park box)   |
+| Cam_trackbars.py       | standalone module to configure and store color filter parameters |
+| Color_Defs.py          | module to read color configurations                          |
+| DrivingBase.py         | functions to encapsulate driving motor and steering servo    |
+| Gyro.py                | functions to get orientation on game pad                     |
+| Led.py                 | functions for RGB LEDs                                       |
+| lidar_data.py          | functions to read distance data from shared memory and calculate minimum distance in defined zones |
+| lidar_logger.py        | standalone helper process to write lidar distances to csv file for debug and test |
+| lidar_reader.py        | standalone process to read raw scan data from LiDAR, process distance data, interpolate them to degrees and write them to the shared memory array. |
+| Roadrunner_state.py    | central state tracking class                                 |
+| Roadrunner2.py         | main programm, sensor data fusion and steering decision logic |
+| Write_Logfile.py       | helper class to write logfile                                |
 
-| Module                 | Purpose |
-| ---------------------- | ------- |
-| Cam.py                 |         |
-| Cam_moduls_contours.py |         |
-| Cam_trackbars.py       |         |
-| Color_Defs.py          |         |
-| DrivingBase.py         |         |
-| Gyro.py                |         |
-| Led.py                 |         |
-| lidar_data.py          |         |
-| lidar_logger.py        |         |
-| lidar_reader.py        |         |
-| Roadrunner_state.py    |         |
-| Roadrunner2.py         |         |
-| Write_Logfile.py       |         |
-
-
+<img src="./v-photos/race_flowchart.png">
 
 ### Sensor Data Preprocessing
 
@@ -637,7 +634,7 @@ After completing the laps, the car performs the parking maneuver while still in 
 
 While doing so, it uses the LiDAR minimum-distance-from-car function to stop before hitting a magenta wall.
 
-
+<img src="./v-photos/Parking_phases.png">
 
 
 
