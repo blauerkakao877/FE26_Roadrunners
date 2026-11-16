@@ -28,10 +28,13 @@ Roadrunners – Future Engineers 2026
 		- [Power Distribution](#power-distribution)
 		- [Wiring Diagram](#wiring-diagram)
 - [Software Architecture & Obstacle Strategy](#software-architecture--obstacle-strategy)
+		- [Overview](#overview)
+		- [Architecture] (#architecture)
+		- [Details] (#details)
 - [Debugging & Testing](#debugging--testing)
 - [Overall System & Engineering Decisions](#overall-system--engineering-decisions)
 	- [Development Goals](#development-goals)
-	- [Design Trade-Offs](#design-trade-offs)
+	- [Design Decisions and Trade-Offs](#design-decisions-and-trade-offs)
 - [Appendices](#appendices)
 	- [Hardware Bill of Materials](#hardware-bill-of-materials)
 	- [Software Modules](#software-modules)
@@ -211,7 +214,7 @@ To find out which Ackermann Configuration works best and whether it is worth to 
 | Configuration          | Turning circle width |
 | ---------------------- | -------------------- |
 | fixed rear axle        | 33.5 cm              |
-| with differential gear | 31.5 cm :heavy_check_mark:  |
+| with differential gear | 31.5 cm :white_check_mark:  |
 
 Decision: The configuration with tie rod in front of the rear axle and differential gear is best, we build that one. 
 The gained agility is worth using a differential gear.
@@ -243,6 +246,7 @@ Goal: Choose a motor and gear combination, that
 Torque needed to get rolling: 
 
 Weight: 572g,  Wheel radius:  22mm,  estimated rolling friction coefficient: 0.05
+
 $$
 Force: F =0.57 kg  * 9.81 m/s^2 * 0.05 = 0.28 N
 $$
@@ -262,7 +266,7 @@ CaDa does not publish official numbers on torque, but community tests (YouTube) 
 | min speed 1:1.4 gear | 0.1 m/sec                                                | 0.1 m/sec                                                    |
 | max speed 1:1 gear   | 1.1 m/sec                                                | 1.58 m/sec                                                   |
 | max speed 1:1.4 gear | 0.85 m/sec                                               | 1.13 m/sec                                                   |
-|                      |                                                          | :heavy_check_mark:                                           |
+|                      |                                                          | :white_check_mark:                                           |
 
 The CaDa minimum speed  at 1:1 gear ratio is still slow enough to drive safely in the parking box an it has the best maximum speed. Additionally, it has metal internal gears which are sturdier than the plastic gears of the Mould King.
 
@@ -280,7 +284,7 @@ Decision: We use the CaDa L Motor Pro with the 1:1 ratio differential gear.
 | Torque      |   2 kg/cm at 5V (20N/cm)   |   2 kg/cm at 5V (20N/cm)   |
 | Weight      |        20g         |       13.4g       |
 | Form Factor |     24x24x40mm     |     23x12x29mm    |
-|  | :heavy_check_mark: |  |
+|  | :white_check_mark: |  |
 
 The MG90S is a little bit lighter than the Geekservo. 
 The Geekservo has a housing with lego connections, so it can be used as a structural element and combines with Lego very easily.
@@ -423,7 +427,7 @@ To ensure accurate color recognition, we increased the brightness and color cont
 
 ### Gyro
 
-<img src="./v-photos/gyro.jpg">
+<img src="./v-photos/Gyro.jpg">
 
 To determine the car’s current orientation on thefield and its cumulative total rotation, we use an IMU sensor (gyro + accelerometer), the Adafruit BNO085 sensor. This sensor is mounted horizontally at the front, aligned with the car’s longitudinal axis. The sensor has a special operating mode called Game Rotation Vector, which allows it to continuously calculate the orientation relative to the starting position. When the gyro starts up, it automatically calibrates itself so that the current orientation is set as the zero orientation. The BNO085 also has a built-in chip that automatically combines the gyroscope and accelerometer data so that we can read the corrected angles directly. 
 
@@ -464,16 +468,16 @@ Seengreat Motor Controller 5V/3A Step-Step-Down:
 
 To get a realistic measurement of the current consumed by the driving motor, we mounted a power meter on a lego plate and attached it to the motor power supply so we can see the measurements while driving.
 
-<img src="./v-photos/Measure_motor_power.png" width="50%">
+<img src="./v-photos/Measure_Motor_Power.png" width="50%">
 
 |                                        | Voltage | Current | Power  |
 | -------------------------------------- | ------- | ------- | ------ |
 | Raspberry Pi (incl. Cameras and LiDAR) | 5.13V   | 1.46A   | 7.5W   |
 | Servo                                  | 5V      | 0.5A    | 2.5W   |
 | RGB LEDs (4x max. 60 mA)               | 5V      | 0.24A   | 1.2W   |
-| Sum at Seengreat 5V Step-Down          |         | 2.2A :heavy_check_mark: | 11.2W :heavy_check_mark:|
+| Sum at Seengreat 5V Step-Down          |         | 2.2A :white_check_mark: | 11.2W :white_check_mark:|
 | Motor                                  | 10V     | 0.5A    | 5W     |
-| Total |         |         | 16.2W :heavy_check_mark:|
+| Total |         |         | 16.2W :white_check_mark:|
 
 The motor controller can handle up to 15 W → fits 16.2 W total power consumption of the car: 16.2 W, max. 20 W is possible (5 W motor + 15 W on the motor controller) 
 
@@ -519,19 +523,28 @@ If a cable comes loose, this graphic helps to put it back in place easily.
 
 # Software Architecture & Obstacle Strategy 
 
-## Architecture Overview
+## Overview
+
+**Development Project**
+
+We used GitHub to maintain our code repository. 
+So far, we released two versions, one for the german national finals and one for the international final. 
+We currently work on a third version to solve the surprise rule extra task, but we are not sure yet whether we will complete it in time.
+To keep track of tasks to do, we used GitHub Issues with labels categorizing the task. Each issue is assiged to who is responsible for completing it.  
+
+**Platforms and Libraries**
 
 We developed our code in Python on a Raspberry Pi 5. To interface with the sensors and the motor driver board, we used the corresponding CircuitPython libraries from Adafruit. For image processing, we use the OpenCV library. We developed our functions for reading LiDAR data based on the GitHub project nannigalaxy/ldrobot_lidar. 
 
-We use GitHub for source code management.
+**Main strategy**
 
-Our main strategy for navigating the obstacle challenge is "Scan while driving". While driving, our car continuously scans the parcours, extract the relevant objects and their positions from the camera image, fuses this information with distance data from the LiDAR and orientation data from the Gyro. From this information, it calculates its next steering decision. 
+For the release2 for the international final, main strategy for navigating the obstacle challenge is "Scan while driving". While driving, our car continuously scans the parcours, extract the relevant objects and their positions from the camera image, fuses this information with distance data from the LiDAR and orientation data from the Gyro. From this information, it calculates its next steering decision. 
+For release3, to solve the surprise rule extra task, we tested and must reconsider. Round one will still be a modified "Scan while driving" strategy, but much slower with stops at some scan points, and it will create a map of the obstacles during the first round and then drive the remaining two rounds using the map. 
 
 
+## Architecture
 
-### Software Modules
-
- Base Classes At the lowest level are base classes that encapsulate the respective hardware components. We have combined the motor and servo into a *DrivingBase* class, which provides all motion functions. LiDAR, the gyro, the camera, and the LEDs are each separate classes. The gyro class not only provides the current orientation on the playing field but also the cumulative total rotation since startup. The camera function already provides a BGR (Blue-Green-Red) image and an HSV (Hue-Saturation-Value) image to make it easier to filter colors. We manage the car’s current state and all the information needed for the next steering decision in a RoadrunnerState class. 
+Base Classes At the lowest level are base classes that encapsulate the respective hardware components. We have combined the motor and servo into a *DrivingBase* class, which provides all motion functions. LiDAR, the gyro, the camera, and the LEDs are each separate classes. The gyro class not only provides the current orientation on the playing field but also the cumulative total rotation since startup. The camera function already provides a BGR (Blue-Green-Red) image and an HSV (Hue-Saturation-Value) image to make it easier to filter colors. We manage the car’s current state and all the information needed for the next steering decision in a RoadrunnerState class. 
 
 The LiDAR sensor generates high data rates that must be quickly retrieved and processed to ensure we always have up-to-date distance data in all directions. At the same time, the camera images must be read and analyzed quickly enough. The Raspberry Pi 5 has 4 processor cores and thus sufficient computing power. However, due to Python’s architecture, all threads of a Python script always run on the same core. To truly run both tasks in parallel and utilize two cores for this purpose, we have split our software into two processes. The `lidar_reader` process, which processes the LiDAR measurement values, makes these available to the `roadrunner2` main process via shared memory. Since Rule 6.14 prohibits the processing of any measurement values before the start button has been pressed, we have created a second shared memory to provide a start signal to downstream processes. 
 
@@ -557,6 +570,8 @@ The LiDAR sensor generates high data rates that must be quickly retrieved and pr
 | Write_Logfile.py       | helper class to write logfile                                |
 
 <img src="./v-photos/Race_Flowchart.png">
+
+## Details
 
 ### Sensor Data Preprocessing
 
@@ -657,7 +672,7 @@ To identify driving errors, crashes, and similar issues live, it is important to
 Our previous car already had LEDs to signal its internal states, but theses were a lot of normal LEDs which occupied a lot of space and consumed a lot of power.
 As our goal was to build a small and flat chassis, we replaced them by 4 RGB LEDs.
 
-<img src="./v-photos/leds_alt_neu.png">
+<img src="./v-photos/Leds_alt_neu.png">
 
 The four RGB LEDs on the back of the car are used, first, to indicate the startup status and when the car is ready for the start button. In addition, while driving, they provide visual feedback when a line has been detected or when an obstacle of a specific color has been detected on a specific side. They also indicate a “too close” alert, which is calculated from the LiDAR data. This makes it easy to observe while driving whether the car is evaluating key measurement data as expected and responding accordingly.
 
@@ -686,9 +701,9 @@ To be sure our color calibration delivers reliable results, we explicitly simula
 
 **Obstacle Configurations**
 
-<img src="./v-photos/Edge_case_test1.png" width="70%">
+<img src="./v-photos/Edge_Case_test1.png" width="70%">
 
-<img src="./v-photos/Edge_case_test2.png" width="70%">
+<img src="./v-photos/Edge_Case_test2.png" width="70%">
 
 
 
@@ -703,39 +718,59 @@ We tested setups with three or four corners all set to such critical combination
 
 # Overall System & Engineering Decisions
 
-Technical Specifications
-
- Length: 18.8 cm, Width: 13.5 cm, Height: 9.5 cm (without Roadrunner pilot) 16.5 cm with Roadrunner pilot Weight: 572 g, Speed: max. approx. 1 m/s
-
-## Development Goals
-
-We analyzed the issues that our previous car model still has and how they could be resolved. 
-
-Our guiding principle is: accuracy over speed.
-
-The camera loses sight of an obstacle well before the car has completely passed it. If the car then detects another obstacle and steers toward the first obstacle to avoid the second one, it may knock the obstacle over. So far, we’ve been estimating when the car has actually passed the obstacle. However, this is rather imprecise and works better or worse depending on the driving angle. When parking, we tried using IR sensors to measure the distances within the parking space. However, this didn’t work well because the IR sensors were too unreliable. A LiDAR system capable of 360-degree all-around measurement seems like a sensible solution to both problems. Problem: To achieve this, the entire car—including the LiDAR—must be built to be less than 10 cm thick, which is a challenge. Overall, a smaller car has more space on the playing field, which is why we reduced both the length and width in previous versions. This year, we’ve also significantly reduced the height to well under 10 cm (excluding the Roadrunner pilot :-)) and lowered the weight. The image below shows the evolution of the Roadrunner versions toward an increasingly compact car.
+The Roadrunner has been revised multiple times to become better with every version.
 
 <img src="./v-photos/Roadrunner_Versionen2.png">
 
+We started with analyzing the issues that our previous car model still has and how they could be resolved.
+From the results, we defined  development goals for this year's car.
+
+## Development Goals
+
+ 
+
+| Priority | Goal Description | Solved Problem |
+| ---- | ---- | ---- |
+|  Goal 1a   | Redesign chassis to support a true 360 degree FoV LiDAR     | knocked over obstacles, touching magenta walls when parking |
+|  Goal 1b  | Redesign Software to make use of 360 degree LiDAR | knocked over obstacles, touching magenta walls when parking |
+|  Goal 2   | Achieve better agility (smaller turning circle) | maneuvering inaccurracies when driving to position for parking |
+|  Goal 3   | Increase maximum speed     | slow rounds in regionals |
+
+Even with lower priority goal 3, our guiding principle stays: accuracy over speed.
+
+Goal 1a and 1b go together to solve the same problems, however, we must achieve goal 1a first, without it, goal 1b is pointless.
+
+**Problem Details**
+
+The camera loses sight of an obstacle well before the car has completely passed it. If the car then detects another obstacle and steers toward the first obstacle to avoid the second one, it may knock the obstacle over. So far, we’ve been estimating when the car has actually passed the obstacle. However, this is rather imprecise and works better or worse depending on the driving angle. When parking, we tried using IR sensors to measure the distances within the parking space. However, this didn’t work well because the IR sensors were too unreliable.
+
+
+
 <img src="./v-photos/Hindernis-Problem.png">
 
-## Design Trade-Offs
+ A LiDAR system capable of 360-degree all-around measurement seems like a sensible solution to both problems. Problem: To achieve this, the entire car—including the LiDAR—must be built to be less than 10 cm thick, which is a challenge,. Overall, a smaller car has more space on the playing field, which is why we reduced both the length and width in previous versions. This year, we’ve also significantly reduced the height to well under 10 cm (excluding the Roadrunner pilot :-)) and lowered the weight. 
 
-- LiDAR vs ToF Sensors
-- LiDAR and Chassis height
-- chassis height (wheel size) and speed
-- speed and rear axle gearing
-- motor choice: speed, gearing and pwm frequency stability
-- previous car: separate motor controller and servo controller.
-- this year: goal: use combined controller to save space and build flat enough for LiDAR
-- test 3 types: adeept robot hat 3.0, waveshare robot driver hat and Seengreat motor and servo hat.
-- problem: only 1 pca9685 pwm driver for both motor pwm and servo pwm.
-  - servo: needs 50 Hz pwm frequency, motors: typically uses a lot higher frequency -> not possible with only 1 pwm driver
-  - original lego PFL Motor rattles loudly at low speed and 50 Hz, CaDa rattles much less due to better gearing quality
-  - disadvantage 1 pwm driver acceptable for CaDa motor, so combined but smaller controller is better
+To be able to achieve goal 1a, we had a number of hardware design design trade-offs.
 
-- LiDAR and Camera position
-- LiDAR, python GIL and software design
+## Design Decisions and Trade-Offs
+
+
+
+| Trade-off                                                    | Reasoning                                                    |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| LiDAR vs ToF Sensors in prev Roadrunner                      | We decided for a LiDAR over the ToF distance sensors we had before. Reason: The LiDAR truly covers 360 degree in 1 degree resolution, ToFs have ver small FoVs. ToFs became unreliable with longer cables. LiDAR is slower than ToFs, but for our use case, a 10 Hz refresh rate is good enough. We use the LiDAR with a tolerance of some centimeters when driving rounds. In the parking box, where more accuracy is needed, we drive very slow, so the refresh rate is ok. |
+| LiDAR and Camera position                                    | The higher camera position in the previous roadrunner was definitely better than the one we have now. It allowed to have only few distortions and it was possible to cut of a few image lines to exclude non-gamepad parts in the camera frame without cutting parts of the obstacles. However, the camera mount blocks the view of the LiDAR, so we had to sacrifice the better camera position for goal 1a and mount the camera at a now lower position. Some non-gamepad background needs now to stay to have a good view of the obstacles and we need extra software filters to compensate for this. The camera now looses sight of the obstacle even a little bit earlier than the previous version, but the fusion with the LiDAR distance data more than compensates this disadvantage and leads to a better overall accuracy. |
+| wheel size                                                   | To achieve goal 1a, we had to use smaller wheels. This results in slower speed with the same motor rpm speed. This contradicts goal 3, but goal 1a has higher priority To compensate for the loss of speed, we chose a faster motor with the same Lego form factor as our old ones. |
+| overall height restriction for goal 1a and motor driver choice | To achieve the desired maximum height, we chose a small driver board combining a number of functions we had on separate boards and elements before: Motor driver, servo driver, 5V step-down, on/off switch. The downsize is, that there is only one pwm frequency for servo and motor. To make the servo work, we had to choose the lower frequency for the servo. This caused our previous motor model to rattle. We already chose a new faster motor model for other reasons. As a plus, it rattled less with the new motor driver due to better quality of internal gearing. Downsize: Its more expensive. |
+| steering elements and chassis size                           | To achieve goal 2, higher agility,  we needed to use a differential gear. However, to fit it into an even smaller chassis, we needed to sacrifice one of our previously two driving motors. This reduces available torque. To compensate for this, the new car must be significantly lighter. One of the heavier elements is the battery. To reduce weight, we selected a much smaller battery than last year. |
+| Software architecture and Rule 6.14                          | To be able to process LiDAR data fast enough, we had to separate it from the main loop. To process LiDAR data truly in parallel, we had to run it in a separate process as the python GIL forces all threads of the same python process to the same CPU core. To be compliant with rule 6.14, no sensor data reading and processing after power-on before pressing the start button, we had to synchronize the LiDAR Processor startup with the main program start button. |
+|                                                              |                                                              |
+|                                                              |                                                              |
+|                                                              |                                                              |
+
+
+
+
 
 
 # Appendices
