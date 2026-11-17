@@ -47,12 +47,23 @@ Roadrunners – Future Engineers 2026
 Welcome to the GitHub hub of **Team Roadrunners**, proudly representing **Germany⚫🔴🟡** at the **WRO World Final 2026**!
 This repository contains all the code, documentation, and resources for our project. We have used scoring criteria from the rulebook as headings in our documentation to make it easy to navigate through our repository.
 
+
+
 ## The Team
 
-Paul Krohn
+| Paul Krohn |      |
+| ---- | ---- |
+|<img src="./t-photos/Paul.jpg" width="131">| Electrical Engineering, Software Development |
 
 
-Ben Lüttecke
+
+| Ben Lüttecke |  |
+| ---- | ---- |
+|<img src="./t-photos/Ben.jpg" width="131">| Mechanical Engineering, Testing, Documentation |
+
+
+
+<img src="./t-photos/Roadrunners_at_work2.png" width="50%">
 
 
 
@@ -261,7 +272,7 @@ CaDa does not publish official numbers on torque, but community tests (YouTube) 
 | -------------------- | -------------------------------------------------------- | ------------------------------------------------------------ |
 |                      | <img src="./v-photos/MouldKing_L_Motor.jpg" width="200"> | <img src="./v-photos/cada-l-motor-pro-cjv5028.jpg" width="200"> |
 | no load rpm          | 500 r/min                                                | 1200 r/min                                                   |
-| voltage              | 9V                                                       | 9V                                                           |
+| voltage              | 9V                                                       | 9-10V                                                        |
 | min speed 1:1 gear   | 0.14 m/sec                                               | 0.13 m/sec                                                   |
 | min speed 1:1.4 gear | 0.1 m/sec                                                | 0.1 m/sec                                                    |
 | max speed 1:1 gear   | 1.1 m/sec                                                | 1.58 m/sec                                                   |
