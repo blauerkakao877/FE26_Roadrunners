@@ -559,7 +559,7 @@ Base Classes At the lowest level are base classes that encapsulate the respectiv
 
 The LiDAR sensor generates high data rates that must be quickly retrieved and processed to ensure we always have up-to-date distance data in all directions. At the same time, the camera images must be read and analyzed quickly enough. The Raspberry Pi 5 has 4 processor cores and thus sufficient computing power. However, due to Python’s architecture, all threads of a Python script always run on the same core. To truly run both tasks in parallel and utilize two cores for this purpose, we have split our software into two processes. The `lidar_reader` process, which processes the LiDAR measurement values, makes these available to the `roadrunner2` main process via shared memory. Since Rule 6.14 prohibits the processing of any measurement values before the start button has been pressed, we have created a second shared memory to provide a start signal to downstream processes. 
 
-<img src="./v-photos/Software_Architecture01.png">
+<img src="./schemes/Software_Architecture01.png">
 
 
 
@@ -580,9 +580,16 @@ The LiDAR sensor generates high data rates that must be quickly retrieved and pr
 | Roadrunner2.py         | main programm, sensor data fusion and steering decision logic |
 | Write_Logfile.py       | helper class to write logfile                                |
 
-<img src="./v-photos/Race_Flowchart.png">
+**State Machine Diagram**
+
+<img src="./schemes/State_Machine_Roadrunner01.png">
+
 
 ## Details
+
+**Details Flowchart**
+
+<img src="./schemes/Race_Flowchart.png">
 
 ### Sensor Data Preprocessing
 
@@ -722,8 +729,23 @@ We found that due to our obstacle strategy "scan and drive", there are combinati
 These are combinations at the corners of the game pad where an obstacle moves out of the cameras field of view before it is completly passed, and the driving straight direction is already at + or - 90 degree because a line has been passed.
 Another difficulty is an obstacle forcing the car to the outer lane directly in front of a corner and one forcing it to the inner lane directly behind the corner and vice versa.
 
-
 We tested setups with three or four corners all set to such critical combinations and run at least 10 x 3 rounds to be sure the algorithm is stable enough. When at least 8 out of 10 were ok, it was good enough.
+
+
+
+| Case                                                         | Problem                                                      | Solution                                                     |
+| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| Dir CW: green obstacle directly in front of parkbox and red obstacle on inner side of previous section (image 1) | Car must turn sharp and pass between green obstacle and magenta parkbox, risk of touching green obstacle or even parkbox | Continuously calculate LiDAR dist from car, emergency stop added if something too near, go back, try again, test multiple times |
+| Dir CW: green obstacle inside in front of line, red obstacle inside directly behind line | car must drive tight curve and pass between obstacle and wall | same as above                                                |
+| LiDAR looks over walls or obstacles                          | LiDAR is mounted so scan height is 8cm, bumps in mat or tilts in laser can cause the LiDAR to measure over walls, returns wrong results | LiDAR mounted at slight tilt to front, so measurement to front is more reliable, use LiDAR in near area, not for long distances, max reliable distances measured in tests |
+| red or green objects near gamepad                            | camera position is so that at least some outside parts are visible | discard red or green blobs if blob is too small or lower edge is too high in image, so estimated above wall, tested with red and green cardboards placed near gamepad |
+| varying lighting conditions                                  | colors vary when lighting varies                             | use explicitly varying lighting (e.g. shadow casting people) when calibrating colors before run |
+|                                                              |                                                              |                                                              |
+|                                                              |                                                              |                                                              |
+|                                                              |                                                              |                                                              |
+|                                                              |                                                              |                                                              |
+
+
 
 
 
