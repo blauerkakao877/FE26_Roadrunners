@@ -37,6 +37,21 @@ class CameraModules:
 
         self.ignore_top_pixels = 15   # REGELBAR
 
+        # ---- Surprise Rule: Pfeilerhoehe 50/100/150 mm ----
+        # AUS, bis eine Fahrt mit der aktuellen Kamera geprueft ist (Hindernis_Mapping/test_surprise_video.py: 0 Flips).
+        # Bei False laeuft alles exakt wie vorher.
+        self.surprise_aktiv = False
+        # Kamera ~50 mm hoch -> Pfeilerhoehe_px / (Unterkante - Horizont) = Hoehe_mm / 50.
+        # Gemessen an FE_26/Bilder_hindernissposi: 50 mm 0.9-1.1, 100 mm 1.8-1.9, 150 mm 2.7-2.9.
+        self.horizont_voll = 53.5      # Horizont-Zeile im vollen Bild 320x240; neu messen bei Kamera-Umbau
+        self.hoehe_klein = 1.4         # darunter -> 50 mm
+        self.hoehe_gross = 2.35        # darueber -> 150 mm
+        self.hoehe_max = 3.3           # darueber unplausibel (Hintergrund verschmolzen) -> normal
+        self.hoehe_min_nenner = 6      # Pfeiler zu weit weg -> nicht bewerten
+        self.hoehe_latch = {"R": "N", "G": "N"}   # letzte sichere Klasse, solange Pfeiler abgeschnitten
+        self.hoehe = {"R": "N", "G": "N"}
+        self.special = False
+
         self.frontcam = None
         self.backcam = None
 
@@ -246,7 +261,23 @@ class CameraModules:
         return any(cv2.contourArea(cnt) > 500 for cnt in contours)
 
     # ================= HINDERNISSE =================
-    def finde_hindernis_contour_schwarz(self, mask, min_area=230, max_area=70000):
+    def hoehe_klasse(self, y, bh, h):
+        """'K' (50 mm), 'N' (100 mm), 'G' (150 mm) oder None = nicht sicher messbar."""
+        if y + bh >= h - 1:
+            return None   # unten abgeschnitten -> Abstand unbekannt
+        nenner = y + bh - (self.horizont_voll - self.top_cut)
+        if nenner < self.hoehe_min_nenner:
+            return "N"    # zu weit weg, lieber kein Flip
+        r = bh / nenner
+        if y <= 1:
+            return None   # oben abgeschnitten (oder mit Hintergrund verschmolzen) -> Merker nehmen
+        if r < self.hoehe_klein:
+            return "K"
+        if self.hoehe_gross < r < self.hoehe_max:
+            return "G"
+        return "N"
+
+    def finde_hindernis_contour_schwarz(self, mask, min_area=230, max_area=70000, farbe=None):
 
         # Glätten
         mask = cv2.medianBlur(mask, 5)
@@ -284,18 +315,31 @@ class CameraModules:
             y_unten = y + bh
 
             if y_unten > self.ignore_top_pixels:
-                gueltige.append((cnt, area, x, y, bw, bh))
+                klasse = self.hoehe_klasse(y, bh, h) if farbe else "N"
+                if klasse is None:
+                    klasse = self.hoehe_latch[farbe]
+                # Groesse auf 100-mm-Pfeiler umrechnen, sonst wirkt 50 mm zu weit / 150 mm zu nah
+                faktor = {"K": 2.0, "N": 1.0, "G": 2.0 / 3.0}[klasse]
+                gueltige.append((cnt, area * faktor, x, y, bw, bh, klasse, faktor))
 
         if not gueltige:
+            if farbe:
+                self.hoehe_latch[farbe] = "N"   # Farbe nicht mehr im Bild -> Merker zuruecksetzen
+                self.hoehe[farbe] = "N"
             return 0, 0, 0
 
         # Größte gültige Kontur nehmen
-        cnt, area, x, y, bw, bh = max(gueltige, key=lambda item: item[1])
+        cnt, area, x, y, bw, bh, klasse, faktor = max(gueltige, key=lambda item: item[1])
 
         cx = x + bw // 2
         cy = y + bh // 2
         
         size = bw * bh
+        if farbe:
+            self.hoehe[farbe] = klasse
+            self.hoehe_latch[farbe] = klasse
+            if klasse != "N":
+                size = int(size * faktor)
 
         return cx, cy, size
 
@@ -315,7 +359,7 @@ class CameraModules:
 
         self.r_mask = cv2.medianBlur(mask, 5)
 
-        x, y, size = self.finde_hindernis_contour_schwarz(self.r_mask)
+        x, y, size = self.finde_hindernis_contour_schwarz(self.r_mask, farbe="R" if self.surprise_aktiv else None)
 
         return x, y, size
 
@@ -331,7 +375,7 @@ class CameraModules:
 
         self.g_mask = cv2.medianBlur(mask, 5)
 
-        x, y, size = self.finde_hindernis_contour_schwarz(self.g_mask)
+        x, y, size = self.finde_hindernis_contour_schwarz(self.g_mask, farbe="G" if self.surprise_aktiv else None)
 
         return x, y, size
 
@@ -340,13 +384,20 @@ class CameraModules:
         gx, gy, gs = self.finde_gruen(hsv)
 
         if rs > gs and rs > 0:
-            return rx, ry, rs, "R"
+            x, y, s, farbe = rx, ry, rs, "R"
 
         elif gs >= rs and gs > 0:
-            return gx, gy, gs, "G"
+            x, y, s, farbe = gx, gy, gs, "G"
 
         else:
+            self.special = False
             return 0, 0, 0, "N"
+
+        # Surprise Rule: Pfeiler nicht 100 mm hoch -> nach der Originalfarbe (umgekehrt) fahren
+        self.special = self.surprise_aktiv and self.hoehe[farbe] != "N"
+        if self.special:
+            farbe = "G" if farbe == "R" else "R"
+        return x, y, s, farbe
 
     # ================= WÄNDE (SCHWARZ) =================
     def wand_filter(self, bgr):

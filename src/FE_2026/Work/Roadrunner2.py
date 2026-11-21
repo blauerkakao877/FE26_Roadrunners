@@ -503,6 +503,8 @@ class Roadrunner:
             self.linksMag = False
         #--Hindernisse finden + auswerten--
         self.x, self.y, self.s, self.state.farbe = self.C.finde_hindernisse(self.hsv_main)
+        if self.C.special:
+            self.WL.write_Log("Surprise-Pfeiler: hoehe "+str(self.C.hoehe)+" -> fahre als "+self.state.farbe)
         self.center = 160
         #--Lidar auslesen--
         _, self.state.LDR = self.LD.getMin_Dist_Bereich_RR(0, 100) #90
