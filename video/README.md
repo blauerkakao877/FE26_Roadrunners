@@ -11,6 +11,9 @@ If not working the videos can be found under these links:
 
 ### Video Links for International Finals:
 
+https://www.youtube.com/watch?v=UgvTucSaBBo
+
+https://www.youtube.com/watch?v=2qhBaNxagVk
 
 ### Video Links for German National Finals:
 
@@ -26,9 +29,15 @@ https://www.youtube.com/watch?v=kO0WY9evncY
 ---
 # Video Links for International Finals:
 
+## Open race
+
+[<img src="../other/Int_Fin_open_video.jpg" width="30%" alt="Open Challenge Video">](https://www.youtube.com/watch?v=UgvTucSaBBo)
 
 
 
+## Obstacle race
+
+[<img src="../other/Int_Fin_obstacle_video.jpg" width="30%" alt="Obstacle Challenge Video">](https://www.youtube.com/watch?v=2qhBaNxagVk)
 
 
 
