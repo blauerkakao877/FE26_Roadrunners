@@ -491,7 +491,11 @@ To get a realistic measurement of the current consumed by the driving motor, we 
 | Motor                                  | 10V     | 0.5A    | 5W     |
 | Total |         |         | 16.2W :white_check_mark:|
 
-The motor controller can handle up to 15 W → fits 16.2 W total power consumption of the car: 16.2 W, max. 20 W is possible (5 W motor + 15 W on the motor controller) 
+The Seengreat onboard 5V Step-Down can handle up to 15W -> 11.2W fits in the range.
+
+The Seengreat's built-in TB6612FNG motor controller can handle up to 1.2A continuous current (up to 3.2 peak) on each channel → fits our driving motor power consumption (10V, cont. current 0.5 A, max peak current 2A at sharp brake)
+
+ Total power consumption of our car: 16.2 W, max. 20 W is possible (5 W motor + 15 W on the motor controller) 
 
 
 
@@ -504,8 +508,22 @@ For the battery, we’re using the Red Power XT with a capacity of 1,100 mAh and
 | <img src="./v-photos/battery.png" width="131"> | 55 mm  | 30 mm | 17 mm  |
 |      |        |       |        |
 
+When our car would run at max. 20W power consumption all the time, the battery would be empty after around 24 minutes. 
+$$
+8.1Wh*60*60 = 29169 Ws
+$$
 
-Purely mathematically speaking, the battery runs out after about 20 minutes at maximum load. That's more than enough to complete a race without running out of power.
+$$
+29169 Ws /20 W = 1458 s
+$$
+
+
+
+This gives us way enough headroom to use it safely in a 3 min competition run, even if the battery was not fully charged at start.
+
+
+
+
 
 ### Power Distribution
 
