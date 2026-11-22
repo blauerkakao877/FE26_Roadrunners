@@ -2,7 +2,7 @@
 
 # Car Photos
 
-In this section, we show photos of our car from all angles, one set witout labels and one setwith explaination labels.
+In this section, we show photos of our car from all angles, one set without labels and one set with explanation labels.
 
 ## High resolution car photos without labels
 

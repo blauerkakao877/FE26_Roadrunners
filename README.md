@@ -228,7 +228,7 @@ To find out which Ackermann Configuration works best and whether it is worth to 
 | fixed rear axle        | 33.5 cm              |
 | with differential gear | 31.5 cm :white_check_mark:  |
 
-Decision: The configuration with tie rod in front of the rear axle and differential gear is best, we build that one. 
+Decision: The configuration with tie rod in front of the front axle and differential gear is best, we build that one. 
 The gained agility is worth using a differential gear.
 
 Steering Servo selection: see Motorization
