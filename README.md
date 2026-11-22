@@ -248,7 +248,7 @@ The resulting driving base looks like this:
 
 **Driving Motor Options**
 
-We needed a motor compatible to the Lego Power Functions L motor form factor to fit seamlessly in our driving base. We had decided to change our last years motor configuration to only one motor with a differential gear.  So we tested two possible motors together with two variants of differential gears. One gearbox provided a 1:1 gear ratio, the other one a 20:28 = 1:1.4 ratio reducing speed but increasing torque.
+We needed a motor compatible to the Lego Power Functions L motor form factor to fit seamlessly in our driving base. We had decided to change our last year's motor configuration to only one motor with a differential gear.  So we tested two possible motors together with two variants of differential gears. One gearbox provided a 1:1 gear ratio, the other one a 20:28 = 1:1.4 ratio reducing speed but increasing torque.
 
 Goal: Choose a motor and gear combination, that
 
@@ -280,7 +280,7 @@ CaDa does not publish official numbers on torque, but community tests (YouTube) 
 | max speed 1:1.4 gear | 0.85 m/sec                                               | 1.13 m/sec                                                   |
 |                      |                                                          | :white_check_mark:                                           |
 
-The CaDa minimum speed  at 1:1 gear ratio is still slow enough to drive safely in the parking box an it has the best maximum speed. Additionally, it has metal internal gears which are sturdier than the plastic gears of the Mould King.
+The CaDa minimum speed  at 1:1 gear ratio is still slow enough to drive safely in the parking box and it has the best maximum speed. Additionally, it has metal internal gears which are sturdier than the plastic gears of the Mould King.
 
 Decision: We use the CaDa L Motor Pro with the 1:1 ratio differential gear.
 
@@ -330,14 +330,14 @@ Height:
 
 <img src="./v-photos/Compare_Controllers1.jpeg" width="70%">
 
-Adeept is higher that the others, which is bad for the LiDAR mounting position.
+Adeept is higher than the others, which is bad for the LiDAR mounting position.
 Additionally, Raspberry Pi headers are not directly accessible
 
 Width:
 
 <img src="./v-photos/Compare_controllers2.jpeg" width="70%">
 
-The Waveshare is broader that the others and the Headers are not easy accessible.
+The Waveshare is broader than the others and the Headers are not easily accessible.
 The Seengreat has the smallest footprint (Bonnet form factor) and all Raspberry Pi headers are freely accessible.
 We chose the Seengreat Motor and Servo Driver HAT.
 Drawback: The Seengreat has only one PWM Driver (PCA9685) for both servo and motor pwm.
@@ -360,13 +360,13 @@ Detailed building instructions for the resulting chassis and the bill of materia
 
 Our analysis of the weaknesses in our previous car model led us to develop a revised sensor concept. We continue to use a gyro (IMU) sensor to determine our orientation on the field. Using one front and one rear camera, we detect lines, obstacles, and walls in the camera’s field of view along the direction of travel. In the immediate vicinity in front of and beside the car, we’ve added a LiDAR sensor to detect objects near the car that the camera cannot (or can no longer) see.
 
-In the previous version of our car, we had an ultrasonic sensor in the front and infrared sensors on the sides. The ultrasonic sensor measured distances in front of the car, while the infrared sensors could only trigger an alarm if something came too close. Our next try were 5 ToFSensors placed on the car's sides. This was already better, but not good enough. The ToFs have a very small field of view, so we had big gaps in our distance measurements. Additionally, the ToFs required the use of an I2C Multiplexer as they all had the same hardcoded I2C address.
+In the previous version of our car, we had an ultrasonic sensor in the front and infrared sensors on the sides. The ultrasonic sensor measured distances in front of the car, while the infrared sensors could only trigger an alarm if something came too close. Our next try were 5 ToF sensors placed on the car's sides. This was already better, but not good enough. The ToFs have a very small field of view, so we had big gaps in our distance measurements. Additionally, the ToFs required the use of an I2C Multiplexer as they all had the same hardcoded I2C address.
 
  This year, we use a LiDAR to solve the problem to detect obstacles and walls outside the camera's field of view.
 
 |                 | Pros                                                  | Cons                                                         |
 | --------------- | ----------------------------------------------------- | ------------------------------------------------------------ |
-| **IR Sensors**  | cheap, easy analog signal processing                  | only fixed distance, poor reliability, extremly unreliable with shiny surfaces |
+| **IR Sensors**  | cheap, easy analog signal processing                  | only fixed distance, poor reliability, extremely unreliable with shiny surfaces |
 | **ToF Sensors** | very fast, exact measurements                         | become unreliable with longer cables, small FoV              |
 | **LiDAR**       | measurements in 1 degree resolution in all directions | 100 msec time between 2 measurements in the same direction   |
 
@@ -441,7 +441,7 @@ To ensure accurate color recognition, we increased the brightness and color cont
 
 <img src="./v-photos/Gyro.jpg">
 
-To determine the car’s current orientation on thefield and its cumulative total rotation, we use an IMU sensor (gyro + accelerometer), the Adafruit BNO085 sensor. This sensor is mounted horizontally at the front, aligned with the car’s longitudinal axis. The sensor has a special operating mode called Game Rotation Vector, which allows it to continuously calculate the orientation relative to the starting position. When the gyro starts up, it automatically calibrates itself so that the current orientation is set as the zero orientation. The BNO085 also has a built-in chip that automatically combines the gyroscope and accelerometer data so that we can read the corrected angles directly. 
+To determine the car’s current orientation on the field and its cumulative total rotation, we use an IMU sensor (gyro + accelerometer), the Adafruit BNO085 sensor. This sensor is mounted horizontally at the front, aligned with the car’s longitudinal axis. The sensor has a special operating mode called Game Rotation Vector, which allows it to continuously calculate the orientation relative to the starting position. When the gyro starts up, it automatically calibrates itself so that the current orientation is set as the zero orientation. The BNO085 also has a built-in chip that automatically combines the gyroscope and accelerometer data so that we can read the corrected angles directly. 
 
 A common problem is gyro drift. This occurs when the measured angle does not return exactly to its initial value after a rotational movement, causing the measurement error to accumulate with each lap driven. With the BNO085, the drift is very low due to the combination with the accelerometer, but it is still noticeable. According to the manufacturer’s datasheet, it amounts to approximately 1.5 degrees per full 360-degree rotation. Since this drift is fairly constant, we compensate for it by adding an offset every 90 degrees.
 
@@ -468,7 +468,7 @@ This presents a problem. The 5 V step-down regulator on the motor driver deliver
 
 ### Power Consumption Check
 
-Seengreat Motor Controller 5V/3A Step-Step-Down: 
+Seengreat Motor Controller 5V/3A Step-Down: 
 
 - Designed to supply 5V to the Raspberry Pi, servo, and LEDs. Raspberry Pi Test Scenario: 
 
@@ -542,7 +542,7 @@ If a cable comes loose, this graphic helps to put it back in place easily.
 We used GitHub to maintain our code repository. 
 So far, we released two versions, one for the german national finals and one for the international final. 
 We currently work on a third version to solve the surprise rule extra task, but we are not sure yet whether we will complete it in time.
-To keep track of tasks to do, we used GitHub Issues with labels categorizing the task. Each issue is assiged to who is responsible for completing it.  
+To keep track of tasks to do, we used GitHub Issues with labels categorizing the task. Each issue is assigned to who is responsible for completing it.  
 
 **Platforms and Libraries**
 
@@ -578,7 +578,7 @@ The LiDAR sensor generates high data rates that must be quickly retrieved and pr
 | lidar_logger.py        | standalone helper process to write lidar distances to csv file for debug and test |
 | lidar_reader.py        | standalone process to read raw scan data from LiDAR, process distance data, interpolate them to degrees and write them to the shared memory array. |
 | Roadrunner_state.py    | central state tracking class                                 |
-| Roadrunner2.py         | main programm, sensor data fusion and steering decision logic |
+| Roadrunner2.py         | main program, sensor data fusion and steering decision logic |
 | Write_Logfile.py       | helper class to write logfile                                |
 
 **State Machine Diagram**
@@ -597,7 +597,7 @@ The level on top of the basic sensor classes contains classes for preprocessing 
 
 To process the LiDAR data, we first determined and stored the car’s own dimensions in terms of LiDAR distances. 
 
-To do so, we wrapped our car in cardboard and recorded the measured distances using the LiDAR Logger. The resulting array of 360 distances in mm is then stored in our software as a property of our car. Now our car known its own dimensions in terms of LiDAR distances in 1-degree resolution.
+To do so, we wrapped our car in cardboard and recorded the measured distances using the LiDAR Logger. The resulting array of 360 distances in mm is then stored in our software as a property of our car. Now our car knows its own dimensions in terms of LiDAR distances in 1-degree resolution.
 
 <img src="./v-photos/own_size.png" width="70%">
 
@@ -609,7 +609,7 @@ This allows us to calculate, based on the current measurement data for each angl
 
 From the BGR camera image, we filter out the black walls and use the maximum height to determine whether there is a risk of collision on the right or left. To easily estimate the wall height, we calculate a binary image with walls appearing white and everything else appearing black. We then calculate a histogram for each image half. If the maximum histogram value on a side exceeds a preconfigured threshold, the wall is dangerously near and the preprocessing raises a collision alarm.
 
-In our first version, we used a grayscale image to filter the black walls. However, this was unreliable in some light situations where dark green obstacles or dark blue lines appeard almost black in the grayscale image too. The BGR image is a more reliable choice. To be real black, an area must have low values in all three color channels.
+In our first version, we used a grayscale image to filter the black walls. However, this was unreliable in some light situations where dark green obstacles or dark blue lines appeared almost black in the grayscale image too. The BGR image is a more reliable choice. To be real black, an area must have low values in all three color channels.
 
 
 
@@ -657,7 +657,7 @@ Solution: Combining camera data with LiDAR data. The LiDAR function “shortest 
 
 ### Main Program
 
-We use the same program for the opening race and the obstacle race. In the obstacle race, we always start from the parking box. After pressing the start button, we first use the LiDAR to check whether the car is standing in the parking box: if there is a wall less than 20 cm in front of the car and a wall less than 40 cm to the left or right, the program enters “Obstacle” mode; otherwise, it enters “Open” mode. In “Obstacle” mode, a separate “Exit Parking” module runs first before the normal loop for driving the laps is executed. 
+We use the same program for the open race and the obstacle race. In the obstacle race, we always start from the parking box. After pressing the start button, we first use the LiDAR to check whether the car is standing in the parking box: if there is a wall less than 20 cm in front of the car and a wall less than 40 cm to the left or right, the program enters “Obstacle” mode; otherwise, it enters “Open” mode. In “Obstacle” mode, a separate “Exit Parking” module runs first before the normal loop for driving the laps is executed. 
 
 **Parking**
 
@@ -690,7 +690,7 @@ To identify driving errors, crashes, and similar issues live, it is important to
 
 **LEDs**
 
-Our previous car already had LEDs to signal its internal states, but theses were a lot of normal LEDs which occupied a lot of space and consumed a lot of power.
+Our previous car already had LEDs to signal its internal states, but these were a lot of normal LEDs which occupied a lot of space and consumed a lot of power.
 As our goal was to build a small and flat chassis, we replaced them by 4 RGB LEDs.
 
 <img src="./v-photos/Leds_alt_neu.png">
@@ -717,7 +717,7 @@ When a driving error occurs, we can align video, LiDAR Log and text logfile to f
 ### Edge Cases
 
 **Color detection**
-Our algorithm relys on good color detection. Colors may vary if, for example, a person stands next to the game pad and casts a shadow.
+Our algorithm relies on good color detection. Colors may vary if, for example, a person stands next to the game pad and casts a shadow.
 To be sure our color calibration delivers reliable results, we explicitly simulate varying light conditions during color calibration. We test our color detection from all angles with and without shadows from walls or persons.
 
 **Obstacle Configurations**
@@ -729,7 +729,7 @@ To be sure our color calibration delivers reliable results, we explicitly simula
 
 
 We found that due to our obstacle strategy "scan and drive", there are combinations of obstacles that are harder for our algorithm to master than others.
-These are combinations at the corners of the game pad where an obstacle moves out of the cameras field of view before it is completly passed, and the driving straight direction is already at + or - 90 degree because a line has been passed.
+These are combinations at the corners of the game pad where an obstacle moves out of the cameras field of view before it is completely passed, and the driving straight direction is already at + or - 90 degree because a line has been passed.
 Another difficulty is an obstacle forcing the car to the outer lane directly in front of a corner and one forcing it to the inner lane directly behind the corner and vice versa.
 
 We tested setups with three or four corners all set to such critical combinations and run at least 10 x 3 rounds to be sure the algorithm is stable enough. When at least 8 out of 10 were ok, it was good enough.
@@ -769,7 +769,7 @@ From the results, we defined  development goals for this year's car.
 | ---- | ---- | ---- |
 |  Goal 1a   | Redesign chassis to support a true 360 degree FoV LiDAR     | knocked over obstacles, touching magenta walls when parking |
 |  Goal 1b  | Redesign Software to make use of 360 degree LiDAR | knocked over obstacles, touching magenta walls when parking |
-|  Goal 2   | Achieve better agility (smaller turning circle) | maneuvering inaccurracies when driving to position for parking |
+|  Goal 2   | Achieve better agility (smaller turning circle) | maneuvering inaccuracies when driving to position for parking |
 |  Goal 3   | Increase maximum speed     | slow rounds in regionals |
 
 Even with lower priority goal 3, our guiding principle stays: accuracy over speed.
@@ -784,9 +784,9 @@ The camera loses sight of an obstacle well before the car has completely passed 
 
 <img src="./v-photos/Hindernis-Problem.png">
 
- A LiDAR system capable of 360-degree all-around measurement seems like a sensible solution to both problems. Problem: To achieve this, the entire car—including the LiDAR—must be built to be less than 10 cm thick, which is a challenge,. Overall, a smaller car has more space on the playing field, which is why we reduced both the length and width in previous versions. This year, we’ve also significantly reduced the height to well under 10 cm (excluding the Roadrunner pilot :-)) and lowered the weight. 
+ A LiDAR system capable of 360-degree all-around measurement seems like a sensible solution to both problems. Problem: To achieve this, the entire car—including the LiDAR—must be built to be less than 10 cm thick, which is a challenge. Overall, a smaller car has more space on the playing field, which is why we reduced both the length and width in previous versions. This year, we’ve also significantly reduced the height to well under 10 cm (excluding the Roadrunner pilot :-)) and lowered the weight. 
 
-To be able to achieve goal 1a, we had a number of hardware design design trade-offs.
+To be able to achieve goal 1a, we had a number of hardware design trade-offs.
 
 ## Design Decisions and Trade-Offs
 
@@ -795,10 +795,10 @@ To be able to achieve goal 1a, we had a number of hardware design design trade-o
 | Trade-off                                                    | Reasoning                                                    |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | Chassis materials                                            | Lego vs 3D printed parts: 3D-printed parts could be better suited for specific building decisions, but: We do not have a 3D printer, so we would have to order printed parts in a 3D printing shop. This takes longer during prototyping. And, surprise rules/extra challenges were announced for this year, so we feel we could adapt faster with Lego if these would require adjustments to chassis design. Decision: Keep Lego |
-| LiDAR vs ToF Sensors in prev Roadrunner                      | We decided for a LiDAR over the ToF distance sensors we had before. Reason: The LiDAR truly covers 360 degree in 1 degree resolution, ToFs have ver small FoVs. ToFs became unreliable with longer cables. LiDAR is slower than ToFs, but for our use case, a 10 Hz refresh rate is good enough. We use the LiDAR with a tolerance of some centimeters when driving rounds. In the parking box, where more accuracy is needed, we drive very slow, so the refresh rate is ok. |
-| LiDAR and Camera position                                    | The higher camera position in the previous roadrunner was definitely better than the one we have now. It allowed to have only few distortions and it was possible to cut of a few image lines to exclude non-gamepad parts in the camera frame without cutting parts of the obstacles. However, the camera mount blocks the view of the LiDAR, so we had to sacrifice the better camera position for goal 1a and mount the camera at a now lower position. Some non-gamepad background needs now to stay to have a good view of the obstacles and we need extra software filters to compensate for this. The camera now looses sight of the obstacle even a little bit earlier than the previous version, but the fusion with the LiDAR distance data more than compensates this disadvantage and leads to a better overall accuracy. |
+| LiDAR vs ToF Sensors in prev Roadrunner                      | We decided for a LiDAR over the ToF distance sensors we had before. Reason: The LiDAR truly covers 360 degree in 1 degree resolution, ToFs have very small FoVs. ToFs became unreliable with longer cables. LiDAR is slower than ToFs, but for our use case, a 10 Hz refresh rate is good enough. We use the LiDAR with a tolerance of some centimeters when driving rounds. In the parking box, where more accuracy is needed, we drive very slow, so the refresh rate is ok. |
+| LiDAR and Camera position                                    | The higher camera position in the previous roadrunner was definitely better than the one we have now. It allowed to have only few distortions and it was possible to cut off a few image lines to exclude non-gamepad parts in the camera frame without cutting parts of the obstacles. However, the camera mount blocks the view of the LiDAR, so we had to sacrifice the better camera position for goal 1a and mount the camera at a now lower position. Some non-gamepad background needs now to stay to have a good view of the obstacles and we need extra software filters to compensate for this. The camera now loses sight of the obstacle even a little bit earlier than the previous version, but the fusion with the LiDAR distance data more than compensates this disadvantage and leads to a better overall accuracy. |
 | wheel size                                                   | To achieve goal 1a, we had to use smaller wheels. This results in slower speed with the same motor rpm speed. This contradicts goal 3, but goal 1a has higher priority To compensate for the loss of speed, we chose a faster motor with the same Lego form factor as our old ones. |
-| overall height restriction for goal 1a and motor driver choice | To achieve the desired maximum height, we chose a small driver board combining a number of functions we had on separate boards and elements before: Motor driver, servo driver, 5V step-down, on/off switch. The downsize is, that there is only one pwm frequency for servo and motor. To make the servo work, we had to choose the lower frequency for the servo. This caused our previous motor model to rattle. We already chose a new faster motor model for other reasons. As a plus, it rattled less with the new motor driver due to better quality of internal gearing. Downsize: Its more expensive. |
+| overall height restriction for goal 1a and motor driver choice | To achieve the desired maximum height, we chose a small driver board combining a number of functions we had on separate boards and elements before: Motor driver, servo driver, 5V step-down, on/off switch. The downside is that there is only one pwm frequency for servo and motor. To make the servo work, we had to choose the lower frequency for the servo. This caused our previous motor model to rattle. We already chose a new faster motor model for other reasons. As a plus, it rattled less with the new motor driver due to better quality of internal gearing. Downside: It's more expensive. |
 | steering elements and chassis size                           | To achieve goal 2, higher agility,  we needed to use a differential gear. However, to fit it into an even smaller chassis, we needed to sacrifice one of our previously two driving motors. This reduces available torque. To compensate for this, the new car must be significantly lighter. One of the heavier elements is the battery. To reduce weight, we selected a much smaller battery than last year. |
 | Software architecture and Rule 6.14                          | To be able to process LiDAR data fast enough, we had to separate it from the main loop. To process LiDAR data truly in parallel, we had to run it in a separate process as the python GIL forces all threads of the same python process to the same CPU core. To be compliant with rule 6.14, no sensor data reading and processing after power-on before pressing the start button, we had to synchronize the LiDAR Processor startup with the main program start button. |
 |                                                              |                                                              |
