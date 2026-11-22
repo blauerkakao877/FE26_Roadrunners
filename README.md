@@ -35,6 +35,7 @@ Roadrunners – Future Engineers 2026
 - [Overall System & Engineering Decisions](#overall-system--engineering-decisions)
 	- [Development Goals](#development-goals)
 	- [Design Decisions and Trade-Offs](#design-decisions-and-trade-offs)
+- [Performance Videos](#performance-videos)
 - [Appendices](#appendices)
 	- [Hardware Bill of Materials](./Building_Instructions/README.md)
 	- [Software Modules](#software-modules)
@@ -813,6 +814,17 @@ However, the adjusted camera tilt has disadvantages for our original driving str
 With our Lego-based solution, we can easily switch between the original camera tilt and the special camera tilt by just adding or removing a small half-bush in 5 min. 
 
 
+
+
+# Performance Videos
+
+Our car in the Open Race and the Obstacle Race for the International Final, with onboard camera view, LiDAR data and explanations. Click a picture to watch the video on YouTube.
+
+<table> <tr> <td align="center">
+    <a href="https://www.youtube.com/watch?v=UgvTucSaBBo"><img src="./other/Int_Fin_open_video.jpg" width="90%" alt="Open Race Video"></a><br>Open Race</td> <td align="center">
+        <a href="https://www.youtube.com/watch?v=2qhBaNxagVk"><img src="./other/Int_Fin_obstacle_video.jpg" width="90%" alt="Obstacle Race Video"></a><br>Obstacle Race</td> </tr> </table>
+
+All videos, including those from the German National Final, can be found in [**video**](./video/README.md).
 
 
 # Appendices
