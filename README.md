@@ -29,14 +29,14 @@ Roadrunners – Future Engineers 2026
 		- [Wiring Diagram](#wiring-diagram)
 - [Software Architecture & Obstacle Strategy](#software-architecture--obstacle-strategy)
 		- [Overview](#overview)
-		- [Architecture] (#architecture)
-		- [Details] (#details)
+		- [Architecture](#architecture)
+		- [Details](#details)
 - [Debugging & Testing](#debugging--testing)
 - [Overall System & Engineering Decisions](#overall-system--engineering-decisions)
 	- [Development Goals](#development-goals)
 	- [Design Decisions and Trade-Offs](#design-decisions-and-trade-offs)
 - [Appendices](#appendices)
-	- [Hardware Bill of Materials](#hardware-bill-of-materials)
+	- [Hardware Bill of Materials](./Building_Instructions/README.md)
 	- [Software Modules](#software-modules)
 	- [Resources](#resources)
 
@@ -53,13 +53,13 @@ This repository contains all the code, documentation, and resources for our proj
 
 | Paul Krohn |      |
 | ---- | ---- |
-|<img src="./t-photos/Paul.jpg" width="131">| Electrical Engineering, Software Development |
+|<img src="./t-photos/paul01.png" width="131">| Electrical Engineering, Software Development |
 
 
 
 | Ben Lüttecke |  |
 | ---- | ---- |
-|<img src="./t-photos/Ben.jpg" width="131">| Mechanical Engineering, Testing, Documentation |
+|<img src="./t-photos/ben01.png" width="131">| Mechanical Engineering, Testing, Documentation |
 
 
 
@@ -587,9 +587,6 @@ The LiDAR sensor generates high data rates that must be quickly retrieved and pr
 
 ## Details
 
-**Details Flowchart**
-
-<img src="./schemes/Race_Flowchart.png">
 
 ### Sensor Data Preprocessing
 
@@ -668,6 +665,11 @@ After completing the laps, the car performs the parking maneuver while still in 
 While doing so, it uses the LiDAR minimum-distance-from-car function to stop before hitting a magenta wall.
 
 <img src="./v-photos/Parking_phases.png">
+
+
+### Details Flowchart
+
+<img src="./schemes/Race_Flowchart.png">
 
 
 
@@ -791,6 +793,7 @@ To be able to achieve goal 1a, we had a number of hardware design design trade-o
 
 | Trade-off                                                    | Reasoning                                                    |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| Chassis materials                                            | Lego vs 3D printed parts: 3D-printed parts could be better suited for specific building decisions, but: We do not have a 3D printer, so we would have to order printed parts in a 3D printing shop. This takes longer during prototyping. And, surprise rules/extra challenges were announced for this year, so we feel we could adapt faster with Lego if these would require adjustments to chassis design. Decision: Keep Lego |
 | LiDAR vs ToF Sensors in prev Roadrunner                      | We decided for a LiDAR over the ToF distance sensors we had before. Reason: The LiDAR truly covers 360 degree in 1 degree resolution, ToFs have ver small FoVs. ToFs became unreliable with longer cables. LiDAR is slower than ToFs, but for our use case, a 10 Hz refresh rate is good enough. We use the LiDAR with a tolerance of some centimeters when driving rounds. In the parking box, where more accuracy is needed, we drive very slow, so the refresh rate is ok. |
 | LiDAR and Camera position                                    | The higher camera position in the previous roadrunner was definitely better than the one we have now. It allowed to have only few distortions and it was possible to cut of a few image lines to exclude non-gamepad parts in the camera frame without cutting parts of the obstacles. However, the camera mount blocks the view of the LiDAR, so we had to sacrifice the better camera position for goal 1a and mount the camera at a now lower position. Some non-gamepad background needs now to stay to have a good view of the obstacles and we need extra software filters to compensate for this. The camera now looses sight of the obstacle even a little bit earlier than the previous version, but the fusion with the LiDAR distance data more than compensates this disadvantage and leads to a better overall accuracy. |
 | wheel size                                                   | To achieve goal 1a, we had to use smaller wheels. This results in slower speed with the same motor rpm speed. This contradicts goal 3, but goal 1a has higher priority To compensate for the loss of speed, we chose a faster motor with the same Lego form factor as our old ones. |
@@ -801,7 +804,13 @@ To be able to achieve goal 1a, we had a number of hardware design design trade-o
 |                                                              |                                                              |
 |                                                              |                                                              |
 
+**Add-On on Chassis material**
 
+To be able to try solving the surprise rule, we have to adjust the camera tilt. In the previous position, the 15 cm obstacle was cut off and not clearly distinguishable from the standard size obstacle. 
+
+However, the adjusted camera tilt has disadvantages for our original driving strategy and we are not sure whether we will finish a modified program for the modified obstacles in time.
+
+With our Lego-based solution, we can easily switch between the original camera tilt and the special camera tilt by just adding or removing a small half-bush in 5 min. 
 
 
 
@@ -810,7 +819,7 @@ To be able to achieve goal 1a, we had a number of hardware design design trade-o
 
 ## Hardware Bill of Materials 
 
-The complete Bill of Materials is found in the Building Instructions
+The complete Bill of Materials is found in the [**Building_Instructions**](./Building_Instructions/README.md)
 
 ## Software Modules
 
