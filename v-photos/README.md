@@ -7,22 +7,22 @@ In this section, we show photos of our car from all angles, one set witout label
 ## High resolution car photos without labels
 
 ### Front
-[<img src="front.jpg" width="100%">](v-photos/front.jpg)
+[<img src="front.jpg" width="100%">](front.jpg)
 
 ### Back
-[<img src="back.jpg" width="100%">](v-photos/back.jpg)
+[<img src="back.jpg" width="100%">](back.jpg)
 
 ### Top
-[<img src="top.jpg" width="100%">](v-photos/top.jpg)
+[<img src="top.jpg" width="100%">](top.jpg)
 
 ### Bottom
-[<img src="bottom.jpg" width="100%">](v-photos/bottom.jpg)
+[<img src="bottom.jpg" width="100%">](bottom.jpg)
 
 ### Right
-[<img src="right.jpg" width="100%">](v-photos/right.jpg)
+[<img src="right.jpg" width="100%">](right.jpg)
 
 ### Left
-[<img src="left.jpg" width="100%">](v-photos/left.jpg)
+[<img src="left.jpg" width="100%">](left.jpg)
 
 ---
 

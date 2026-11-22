@@ -11,24 +11,24 @@ However, we have not listed every single lego technic element on this list as th
 ## Rear Axle and Motor Block
 Start with the rear axle. Assemble the back side and attach the motor, the the right side.
 
-[<img src="BI_rear_axle_01.png" width="100%">](Building_Instructions/BI_rear_axle_01.png)
+[<img src="BI_rear_axle_01.png" width="100%">](BI_rear_axle_01.png)
 
 Now assemble the axle and the differential gears.
 
-[<img src="BI_rear_axle_02.png" width="100%">](Building_Instructions/BI_rear_axle_02.png)
+[<img src="BI_rear_axle_02.png" width="100%">](BI_rear_axle_02.png)
 
 Then add the left side.
 
-[<img src="BI_rear_axle_03.png" width="100%">](Building_Instructions/BI_rear_axle_03.png)
+[<img src="BI_rear_axle_03.png" width="100%">](BI_rear_axle_03.png)
 
 Close the casing and add the support for the battery.
 
-[<img src="BI_rear_axle_04.png" width="100%">](Building_Instructions/BI_rear_axle_04.png)
+[<img src="BI_rear_axle_04.png" width="100%">](BI_rear_axle_04.png)
 
 Finally, add the side beams to hold the axle stoppers in place. 
 With those, the axle parts cannot come loose and let the wheel fall off.
 
-[<img src="BI_rear_axle_05.png" width="100%">](Building_Instructions/BI_rear_axle_05.png)
+[<img src="BI_rear_axle_05.png" width="100%">](BI_rear_axle_05.png)
 
 Now the rear axle box is a firm block and cannot come off in any pulling direction.
 
@@ -37,26 +37,26 @@ Now the rear axle box is a firm block and cannot come off in any pulling directi
 To save space, the steering servo is integrated in the front axle.
 Start with the right and left supporting structures for the main front axle and the connection to the steering servo.
 
-[<img src="BI_front_axle_01.png" width="100%">](Building_Instructions/BI_front_axle_01.png)
+[<img src="BI_front_axle_01.png" width="100%">](BI_front_axle_01.png)
 
 Connect the steering lever to the servo.
 
-[<img src="BI_front_axle_02.png" width="100%">](Building_Instructions/BI_front_axle_02.png)
+[<img src="BI_front_axle_02.png" width="100%">](BI_front_axle_02.png)
 
 Now build and attach the right and left steering arms. 
 
-[<img src="BI_front_axle_03.png" width="100%">](Building_Instructions/BI_front_axle_03.png)
+[<img src="BI_front_axle_03.png" width="100%">](BI_front_axle_03.png)
 
 Finally add the beams to complete the main front axle and attach the tie rod.
 
-[<img src="BI_front_axle_04.png" width="100%">](Building_Instructions/BI_front_axle_04.png)
+[<img src="BI_front_axle_04.png" width="100%">](BI_front_axle_04.png)
 
 
 ## Driving Base
 
 Now connect rear axle box and front axle to form the complete driving base.
 
-[<img src="BI_driving_base_01.png" width="100%">](Building_Instructions/BI_driving_base_01.png)
+[<img src="BI_driving_base_01.png" width="100%">](BI_driving_base_01.png)
 
 
 ## Electronics
@@ -64,17 +64,17 @@ Now connect rear axle box and front axle to form the complete driving base.
 To mount the electronic elements as controllers and sensors, we have added some supporting structures.
 Front side supporting structures:
 
-[<img src="BI_electronic_mounts_front_01.png" width="100%">](Building_Instructions/BI_electronic_mounts_front_01.png)
+[<img src="BI_electronic_mounts_front_01.png" width="100%">](BI_electronic_mounts_front_01.png)
 
-[<img src="BI_electronic_mounts_front_02.png" width="100%">](Building_Instructions/BI_electronic_mounts_front_02.png)
+[<img src="BI_electronic_mounts_front_02.png" width="100%">](BI_electronic_mounts_front_02.png)
 
 rear side supporting structures:
 
-[<img src="BI_electronic_mounts_back_01.png" width="100%">](Building_Instructions/BI_electronic_mounts_back_01.png)
+[<img src="BI_electronic_mounts_back_01.png" width="100%">](BI_electronic_mounts_back_01.png)
 
 Electronics placements:
 
-[<img src="BI_electronics_01.png" width="100%">](Building_Instructions/BI_electronics_01.png)
+[<img src="BI_electronics_01.png" width="100%">](BI_electronics_01.png)
 
 
 
