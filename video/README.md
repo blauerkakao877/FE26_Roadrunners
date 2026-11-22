@@ -4,7 +4,7 @@
 
 
 
-In this directory you will find several video links. The videos show our car performing in both the Open race and the Obstacle Race including a parallel Onboard-Camera View, LiDAR Data and and explainations. 
+In this directory you will find several video links. The videos show our car performing in both the Open race and the Obstacle Race including a parallel Onboard-Camera View, LiDAR Data and explanations. 
 
 The pictures below are clickable and link directly to the corresponding Youtube videos.
 If not working the videos can be found under these links:
@@ -21,9 +21,6 @@ https://www.youtube.com/watch?v=2qhBaNxagVk
 https://www.youtube.com/watch?v=euGolSq_b-Y
 
 https://www.youtube.com/watch?v=kO0WY9evncY
-
-
-### 
 
 
 ---
