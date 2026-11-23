@@ -1,14 +1,15 @@
 # Testwerkzeuge und Fahrtauswertung
 
-Hier beschreiben wir zwei Bereiche, in denen uns Claude (ein KI-Assistent von
-Anthropic) in der Saison 2026 geholfen hat. Die Entscheidungen, die Tests auf
-der Matte und die Bewertung der Ergebnisse lagen immer bei uns.
+Hier beschreiben wir, wie wir neue Ideen offline testen und Fahrten auswerten.
+Beim Schreiben einzelner Skripte haben wir Claude (KI-Assistent von Anthropic)
+als Hilfswerkzeug genutzt, ähnlich wie eine Dokumentation oder ein Forum.
+Ideen, Tests auf der Matte, Auswertung und Entscheidungen kommen von uns.
 
 ## 1. Testwerkzeuge und Analyse-Skripte
 
 Eine unserer Regeln heißt **„Test new ideas early“**. Jede Testfahrt kostet
 aber Zeit: Auto aufbauen, Hindernisse stellen, fahren, Logs holen. Deshalb
-haben wir mit Claude Werkzeuge gebaut, mit denen wir neue Ideen **offline gegen
+haben wir Werkzeuge gebaut, mit denen wir neue Ideen **offline gegen
 Aufnahmen** testen können, statt jedes Mal neu zu fahren.
 
 | Werkzeug | Was es macht |
@@ -44,7 +45,7 @@ Bei jeder Fahrt entstehen drei Aufnahmen:
 - die **LiDAR-CSV** (10 Zeilen pro Sekunde, Start genau beim Startsignal).
 
 Um einen Fahrfehler zu verstehen, muss man alle drei auf dieselbe Zeitachse
-legen. Mit Claude haben wir dafür **gemeinsame Zeitmarken** genutzt: Ereignisse,
+legen. Dafür nutzen wir **gemeinsame Zeitmarken**: Ereignisse,
 die in allen drei Quellen sichtbar sind. Die beste Marke ist der **3-s-Stopp
 nach drei Runden**:
 
