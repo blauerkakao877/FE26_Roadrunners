@@ -8,15 +8,15 @@ One of our rules is "Test new ideas early". But every test drive takes time: set
 
 | Tool | Purpose |
 |---|---|
-| [`Hindernis_Map.py`](src/FE_2026/Hindernis_Mapping/Hindernis_Map.py) | Assigns each pillar in the camera image to one of 6 positions and detects its height (50 / 100 / 150 mm) for the Surprise Rule. |
-| [`test_mapping.py`](src/FE_2026/Hindernis_Mapping/test_mapping.py) | Checks the mapping against our test photos; must print "Alles OK.". |
-| [`test_surprise_video.py`](src/FE_2026/Hindernis_Mapping/test_surprise_video.py) | Runs real drive videos through the same detection code as the car and counts wrong color flips. |
+| [`Hindernis_Map.py`](FE_2026/Hindernis_Mapping/Hindernis_Map.py) | Assigns each pillar in the camera image to one of 6 positions and detects its height (50 / 100 / 150 mm) for the Surprise Rule. |
+| [`test_mapping.py`](FE_2026/Hindernis_Mapping/test_mapping.py) | Checks the mapping against our test photos; must print "Alles OK.". |
+| [`test_surprise_video.py`](FE_2026/Hindernis_Mapping/test_surprise_video.py) | Runs real drive videos through the same detection code as the car and counts wrong color flips. |
 
 - **Same code as on the car.** The video test loads the real camera module and only replaces the Pi hardware with stubs.
 - **Simulated edge cases.** Green pillars are recolored red, and approaching a pillar is simulated by zooming in until its top is cut off.
 - **Clear release rule.** The Surprise Rule stays disabled until a normal run with the current camera shows 0 wrong flips (checked on 5163 frames).
 
-Details: [Hindernis_Mapping README](src/FE_2026/Hindernis_Mapping/README.md).
+Details: [Hindernis_Mapping README](FE_2026/Hindernis_Mapping/README.md).
 
 ## Aligning recordings
 
