@@ -731,6 +731,7 @@ To record LiDAR measurement data, we have created an additional LiDAR logger pro
 
 During testing, we first ran multiple tests using random combinations of obstacles. For some combinations, we identified an increased risk of driving errors. Using the tools described above, we then determined the specific cause of each driving error and, where necessary, added additional log messages. Once we found a solution, we tested it at least 5–10 times with that combination and other obstacle combinations that, in theory, should cause the same problem. This ensured that the solution was truly effective and had no adverse side effects. We also used this method to optimize parameter settings such as the size of the LiDAR safety zone or the gradations in the steering angle formula.
 When a driving error occurs, we can align video, LiDAR Log and text logfile to find out the reason. We can then see whether a strategy does not work out or whether it just needs some tuning.
+Our offline test tools and how we align the recordings are described in [Test_Tools_and_Run_Analysis.md](Test_Tools_and_Run_Analysis.md).
 
 ### Edge Cases
 
