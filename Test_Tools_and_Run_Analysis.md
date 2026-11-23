@@ -1,6 +1,6 @@
 # Test Tools and Run Analysis
 
-We used Claude (AI assistant by Anthropic) as a helper tool while writing some scripts. Ideas, field tests and decisions are our own.
+We used Claude (AI assistant by Anthropic) only as a supporting tool: for tests and simulation, and to check our code for errors. Ideas, field tests and decisions are our own.
 
 ## Offline test tools
 
