@@ -394,7 +394,6 @@ Requirements:
 | Scanning frequency | 10 Hz       | 5.5 Hz      |
 | Size               | 39x39x34 mm | 97x70x55 mm |
 | Weight             | 47 g        | 170 g       |
-|                    |             |             |
 
 We chose the STP-19L, especially because it has a very short minimum distance and high accuracy. This allows it to be used within the parking box.
 
@@ -421,7 +420,6 @@ We tested the RPI V3 Wide and Waveshare 160 degree camera.
 | nominal FoV (diagonal) | 120         | 160           |
 | Sensor                 | Sony IMX708 | Sony IMX219   |
 | max. Resolution        | 4608 × 2592 | 3280 × 2464   |
-|                        |             |               |
 
 Resolution is not a criterion as we use a very reduced image resolution to speed up image processing.
 
@@ -460,7 +458,6 @@ First estimation of power consumption (maximum values):
 | RGB LEDs (4x max. 60 mA)               | 5V      | 0.24A   | 1.2W   |
 | Sum at Seengreat 5V Step-Down          |         | 5.74A :exclamation:  | 28.74W :exclamation:|
 | Motor                                  | 10V     | 0.5A    | 5W     |
-|                                        |         |         |        |
 
 According to tests on Philohome (see sources), the drive motor consumes approximately 500 mA (~5 W) at 10 V under load. 
 
@@ -506,7 +503,6 @@ For the battery, we’re using the Red Power XT with a capacity of 1,100 mAh and
 |      | Length | Width | Height |
 | ---- | ------ | ----- | ------ |
 | <img src="./v-photos/battery.png" width="131"> | 55 mm  | 30 mm | 17 mm  |
-|      |        |       |        |
 
 When our car would run at max. 20W power consumption all the time, the battery would be empty after around 24 minutes. 
 $$
@@ -762,10 +758,6 @@ We tested setups with three or four corners all set to such critical combination
 | LiDAR looks over walls or obstacles                          | LiDAR is mounted so scan height is 8cm, bumps in mat or tilts in laser can cause the LiDAR to measure over walls, returns wrong results | LiDAR mounted at slight tilt to front, so measurement to front is more reliable, use LiDAR in near area, not for long distances, max reliable distances measured in tests |
 | red or green objects near gamepad                            | camera position is so that at least some outside parts are visible | discard red or green blobs if blob is too small or lower edge is too high in image, so estimated above wall, tested with red and green cardboards placed near gamepad |
 | varying lighting conditions                                  | colors vary when lighting varies                             | use explicitly varying lighting (e.g. shadow casting people) when calibrating colors before run |
-|                                                              |                                                              |                                                              |
-|                                                              |                                                              |                                                              |
-|                                                              |                                                              |                                                              |
-|                                                              |                                                              |                                                              |
 
 
 
@@ -820,9 +812,6 @@ To be able to achieve goal 1a, we had a number of hardware design trade-offs.
 | overall height restriction for goal 1a and motor driver choice | To achieve the desired maximum height, we chose a small driver board combining a number of functions we had on separate boards and elements before: Motor driver, servo driver, 5V step-down, on/off switch. The downside is that there is only one pwm frequency for servo and motor. To make the servo work, we had to choose the lower frequency for the servo. This caused our previous motor model to rattle. We already chose a new faster motor model for other reasons. As a plus, it rattled less with the new motor driver due to better quality of internal gearing. Downside: It's more expensive. |
 | steering elements and chassis size                           | To achieve goal 2, higher agility,  we needed to use a differential gear. However, to fit it into an even smaller chassis, we needed to sacrifice one of our previously two driving motors. This reduces available torque. To compensate for this, the new car must be significantly lighter. One of the heavier elements is the battery. To reduce weight, we selected a much smaller battery than last year. |
 | Software architecture and Rule 6.14                          | To be able to process LiDAR data fast enough, we had to separate it from the main loop. To process LiDAR data truly in parallel, we had to run it in a separate process as the python GIL forces all threads of the same python process to the same CPU core. To be compliant with rule 6.14, no sensor data reading and processing after power-on before pressing the start button, we had to synchronize the LiDAR Processor startup with the main program start button. |
-|                                                              |                                                              |
-|                                                              |                                                              |
-|                                                              |                                                              |
 
 **Add-On on Chassis material**
 
