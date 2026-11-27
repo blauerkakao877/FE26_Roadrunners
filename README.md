@@ -32,6 +32,7 @@ Roadrunners – Future Engineers 2026
 		- [Architecture](#architecture)
 		- [Details](#details)
 - [Debugging & Testing](#debugging--testing)
+	- [Test Tools and Run Analysis](#test-tools-and-run-analysis)
 - [Overall System & Engineering Decisions](#overall-system--engineering-decisions)
 	- [Development Goals](#development-goals)
 	- [Design Decisions and Trade-Offs](#design-decisions-and-trade-offs)
@@ -762,6 +763,12 @@ We tested setups with three or four corners all set to such critical combination
 
 
 
+
+## Test Tools and Run Analysis
+
+To test new ideas without a new test drive every time, we built offline tools that run our real detection code against recorded camera images and videos.
+To find the cause of a driving error, we align the camera video, the Pi log and the LiDAR log on one time axis.
+The full description, including the tool list and our findings, is in [**src/Test_Tools_and_Run_Analysis.md**](src/Test_Tools_and_Run_Analysis.md).
 
 # Overall System & Engineering Decisions
 
