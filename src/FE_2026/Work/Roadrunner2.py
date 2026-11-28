@@ -511,7 +511,21 @@ class Roadrunner:
         _, self.state.LDL = self.LD.getMin_Dist_Bereich_RR(260, 0) #270
         _, self.state.LDV = self.LD.getMin_Dist_Bereich_RR(353, 7)
             
-    # -------------------- PARKEN -------------------- 
+    # -------------------- WARTEN MIT VIDEO --------------------
+    def warten_mit_video(self, dauer, sperre_V=False):
+        # wie time.sleep(dauer), schreibt aber weiter Frames -> kein Sprung im Video
+        ende = time.time() + dauer
+        while time.time() < ende:
+            _, _, bgr_main, _, _ = self.C.get_image()
+            if bgr_main is None:
+                time.sleep(0.01)
+                continue
+            img = bgr_main.copy()
+            if sperre_V:
+                cv2.line(img, (img.shape[1]-159, 0), (img.shape[1]-159, img.shape[0]), (0, 255, 255), 4)
+            self.C.write_frame(img)
+
+    # -------------------- PARKEN --------------------
     def einparken_l(self):
         self.state.eingeparkt = False
         self.linksMag = False
@@ -709,19 +723,21 @@ class Roadrunner:
         self.D.stop()
         self.L.all_on(WHITE)
         time.sleep(0.3)
+        # Fahrt zur Wand: Ziel = 90° links, Gyro-Regler lenkt (statt fest bis -80 und dann gerade)
+        self.state.geradeaus = self.state.geradeaus -90
+        self.WL.write_Log("Ziel-Winkel Fahrt zur Wand: "+str(self.state.geradeaus))
         self.D.vor(0.2)
-        self.D.nach_links()
-        while self.state.gesamt > self.state.geradeaus -80:
-            self.state.winkel, self.state.gesamt = self.G.WinkelMessen()
-            time.sleep(0.1)
-        self.D.stop()
-        self.D.gerade()
-        time.sleep(0.1)
-        self.D.vor(0.2)
+        _, self.state.LDV = self.LD.getMin_Dist_Bereich_RR(353, 7)
         while self.state.LDV > 50:
-            time.sleep(0.1)
+            self.geradeaus_lenken_parken()
+            time.sleep(0.05)
             _, self.state.LDV = self.LD.getMin_Dist_Bereich_RR(353, 7)
-        time.sleep(1.0)
+        # die letzte Sekunde bis zur Wand weiter nach Gyro lenken
+        bis_wand = time.time() + 1.0
+        while time.time() < bis_wand:
+            self.geradeaus_lenken_parken()
+            time.sleep(0.05)
+        self.D.gerade()
         self.D.vor(0.5)
         time.sleep(0.2)
         self.D.stop()
@@ -1092,11 +1108,11 @@ class Roadrunner:
             "slow": {
                 "run_speed": 0.23,
                 
-                "linie_warten": 2.3,
-                "linie_warten_LG": 2.3,
-                "linie_warten_LR": 3.5,
-                "linie_warten_RG": 3.5,
-                "linie_warten_RR": 2.3,
+                "linie_warten": 2.5,
+                "linie_warten_LG": 2.5, #2,3
+                "linie_warten_LR": 3.7, #2.5
+                "linie_warten_RG": 3.7,
+                "linie_warten_RR": 2.5,
 
                 "linie_zaehlen": 0.45,
                 "linie_zaehlen_LG": 0.45,
@@ -1104,10 +1120,10 @@ class Roadrunner:
                 "linie_zaehlen_RG": 0.45,
                 "linie_zaehlen_RR": 0.45,
                 
-                "stop_time_LG": 2.0,
-                "stop_time_LR": 3.0,
-                "stop_time_RG": 3.0,
-                "stop_time_RR": 2.0,
+                "stop_time_LG": 3.0, #0.2
+                "stop_time_LR": 4.0, #0.3
+                "stop_time_RG": 4.0, #0.3
+                "stop_time_RR": 3.0, #0.2
             },
             
             "medium": {
@@ -1411,17 +1427,17 @@ class Roadrunner:
                     else:
                         self.D.steer(+15)
                     
-            elif self.state.LDV < 80 and self.state.LDV > 0: #70
+            elif self.state.LDV < 90 and self.state.LDV > 0: #80
                 special = True
+                self.D.ruck(0.4)
+                self.D.gerade()
                 self.pink_last = time.time()
                 self.state.Lidarsperre_V = True
-                self.WL.write_Log("Ruck fahren, weil Lidar vorne < 70: "+str(self.state.LDV))
-                self.D.gerade()
-                self.D.ruck(0.3)
-                time.sleep(1.0)
+                self.WL.write_Log("Ruck fahren, weil Lidar vorne < 90: "+str(self.state.LDV))
+                self.warten_mit_video(0.5, sperre_V=True)
                 self.D.stop()
                 self.geradeaus_lenken()
-                time.sleep(0.2)
+                self.warten_mit_video(0.2, sperre_V=True)
                 self.D.vor(self.speed)
                 
 

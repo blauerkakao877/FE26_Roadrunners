@@ -43,7 +43,7 @@ class State:
         self.k = 0.6
         self.drift_kor = 0.3 #0.2
         
-        # Ende
+        # Ende werden aus presets gesetzt!!
         self.stop_time = 0.0
         self.stop_time_LG = 3.0
         self.stop_time_LR = 4.0

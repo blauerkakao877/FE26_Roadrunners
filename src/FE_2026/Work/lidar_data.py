@@ -216,15 +216,18 @@ if __name__ == "__main__":
     #ld.main()
     try:
         while True:
-            winkel,wert = ld.getMin_Dist_Bereich_RR(270,0,False)
-            Rwinkel,Rwert = ld.getMin_Dist_Bereich_RR(0,90,False)
+            #winkel,wert = ld.getMin_Dist_Bereich_RR(270,0,False)
+            #Rwinkel,Rwert = ld.getMin_Dist_Bereich_RR(0,90,False)
             Vwinkel,Vwert = ld.getMin_Dist_Bereich_RR(353,7,False)
+            Hwinkel,Hwert = ld.getMin_Dist_Bereich_RR(175,185,False)
             #winkel,wert = ld.getMin_Dist_Bereich(270,0,False)
-            print(f"Winkel {winkel} Entfernung {wert}")
-            print(f"R_Winkel {Rwinkel} R_Entfernung {Rwert}")
+            #print(f"Winkel {winkel} Entfernung {wert}")
+            #print(f"R_Winkel {Rwinkel} R_Entfernung {Rwert}")
             print(f"V_Winkel {Vwinkel} V_Entfernung {Vwert}")
+            print(f"H_Winkel {Hwinkel} H_Entfernung {Hwert}")
             
-            time.sleep(0.1)
+            #time.sleep(0.1)
+            time.sleep(2.0)
         
     except KeyboardInterrupt:
             print("\nStopping Lidar Data")
